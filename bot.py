@@ -31,50 +31,47 @@ def check_message(update: Update, context: CallbackContext):
     print(f"[DEBUG] Chat ID: {update.effective_chat.id}")
 
 def check_message(update: Update, context: CallbackContext):
-    message = update.message or update.channel_post  # Handle both
-    chat_id = update.effective_chat.id  # Dynamically get the chat ID
-    user_id = update.effective_user.id  # Get the user ID of the person sending the message
+    message = update.message or update.channel_post  # Handle both messages and channel posts
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    user = update.effective_user
 
-    # Fetch the list of admins in the chat
+    # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
     admin_ids = [admin.user.id for admin in chat_admins]
-
-    # Prevent the bot from acting on the owner's and admins' messages
+    
     if user_id in admin_ids:
         print("[DEBUG] Skipping action for an admin or owner.")
-        return  # Do nothing if the message is from an admin or the owner
-
-    print(f"[DEBUG] Received message in chat ID: {chat_id}")
-    print(f"[DEBUG] message.text: {getattr(message, 'text', None)}")
+        return
 
     if not message or not message.text:
-        return  # Skip non-text or unsupported updates
+        return  # Skip non-text or unsupported messages
 
     message_text = message.text.lower()
-    user = update.effective_user
+    print(f"[DEBUG] Received message: '{message_text}' from user: {user.first_name} (ID: {user_id})")
 
     # Check for ban phrases
     for phrase in BAN_PHRASES:
-        pattern = rf'\b{re.escape(phrase)}\b'
-        if re.search(pattern, message_text):
-            context.bot.kick_chat_member(chat_id=chat_id, user_id=user.id)
+        if phrase in message_text:
+            print(f"[BAN MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
+            context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
             message.reply_text(f"arc angel fallen. {user.first_name} has been banned.")
             return
 
     # Check for mute phrases
     for phrase in MUTE_PHRASES:
-        pattern = rf'\b{re.escape(phrase)}\b'
-        if re.search(pattern, message_text):
+        if phrase in message_text:
+            print(f"[MUTE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
             until_date = message.date + timedelta(seconds=MUTE_DURATION)
             permissions = ChatPermissions(can_send_messages=False)
             context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=permissions, until_date=until_date)
             message.reply_text(f"{user.first_name} has been muted for 3 days.")
             return
-        
+
     # Check for delete phrases
     for phrase in DELETE_PHRASES:
-        pattern = rf'\b{re.escape(phrase)}\b'
-        if re.search(pattern, message_text):
+        if phrase in message_text:
+            print(f"[DELETE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
             context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
 
