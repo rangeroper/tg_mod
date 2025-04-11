@@ -1,3 +1,7 @@
 .env
 __pycache__/
 *.pyc
+
+# Python virtual environment
+venv/
+telegram-bot-env/
