@@ -4046,3 +4046,6 @@ x 1000
 998 x  
 999 x  
 1000 x
+profit
+i made a lot of sol
+i have made big profit
