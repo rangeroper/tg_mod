@@ -99,20 +99,32 @@ def check_message(update: Update, context: CallbackContext):
                     media_path = os.path.join(MEDIA_FOLDER, media_file)
 
                     if os.path.exists(media_path):
-                        if media_type == "gif" or media_type == "animation":
-                            context.bot.send_animation(chat_id=chat_id, animation=open(media_path, 'rb'), caption=response_text)
-                        elif media_type == "image":
-                            context.bot.send_photo(chat_id=chat_id, photo=open(media_path, 'rb'), caption=response_text)
-                        elif media_type == "video":
-                            context.bot.send_video(chat_id=chat_id, video=open(media_path, 'rb'), caption=response_text)
-                        else:
-                            print(f"[WARN] Unknown media type '{media_type}' for trigger '{trigger}'")
+                        with open(media_path, 'rb') as media:
+                            if media_type == "gif" or media_type == "animation":
+                                if response_text:
+                                    context.bot.send_animation(chat_id=chat_id, animation=media, caption=response_text)
+                                else:
+                                    context.bot.send_animation(chat_id=chat_id, animation=media)
+                            elif media_type == "image":
+                                if response_text:
+                                    context.bot.send_photo(chat_id=chat_id, photo=media, caption=response_text)
+                                else:
+                                    context.bot.send_photo(chat_id=chat_id, photo=media)
+                            elif media_type == "video":
+                                if response_text:
+                                    context.bot.send_video(chat_id=chat_id, video=media, caption=response_text)
+                                else:
+                                    context.bot.send_video(chat_id=chat_id, video=media)
+                            else:
+                                print(f"[WARN] Unknown media type '{media_type}' for trigger '{trigger}'")
                     else:
                         print(f"[ERROR] Media file '{media_path}' not found.")
+                        if response_text:
+                            message.reply_text(response_text)
+                else:
+                    if response_text:
                         message.reply_text(response_text)
 
-                else:
-                    message.reply_text(response_text)
 
                 return  # Only respond to first matched filter
 
