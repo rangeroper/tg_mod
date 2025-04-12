@@ -100,8 +100,6 @@ def check_message(update: Update, context: CallbackContext):
         print(f"[DEBUG] Checking for trigger: '{normalized_trigger}' in message: '{normalized_message}'")
 
         if normalized_trigger in normalized_message:
-            print(f"[FILTER MATCH] Trigger: '{trigger}' matched in message: '{normalized_message}'")
-
             response_text = filter_data.get("response_text", "")
             media_file = filter_data.get("media")
             media_type = filter_data.get("type", "gif").lower()  # Default to gif if not specified
@@ -129,7 +127,6 @@ def check_message(update: Update, context: CallbackContext):
                         else:
                             print(f"[WARN] Unknown media type '{media_type}' for trigger '{trigger}'")
                 else:
-                    print(f"[ERROR] Media file '{media_path}' not found.")
                     if response_text:
                         message.reply_text(response_text)
             else:
