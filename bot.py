@@ -133,15 +133,25 @@ def check_message(update: Update, context: CallbackContext):
             return  # Only respond to first matched filter
         
 def list_filters(update: Update, context: CallbackContext):
-    # Grab only unique command-style filters (those starting with "/")
-    filter_keys = [key for key in FILTERS.keys() if key.startswith("/")]
-    filter_keys = sorted(set(filter_keys))  # Sort & deduplicate
+    # Load the latest filters
+    with open(FILTERS_FILE, 'r', encoding='utf-8') as f:
+        filters = json.load(f)
 
-    if filter_keys:
-        response = "\n".join(filter_keys)
-        update.message.reply_text(f"Available filters:\n{response}")
+    # Get and sort all triggers alphabetically (removing leading slash only for sorting)
+    sorted_triggers = sorted(filters.keys(), key=lambda k: k.lstrip('/').lower())
+
+    # Re-apply slash only if the original trigger had it
+    formatted_triggers = [f"`{trigger}`" for trigger in sorted_triggers]
+
+    # Telegram messages max out at 4096 characters
+    response = "*Available Filters:*\n" + "\n".join(formatted_triggers)
+    if len(response) > 4000:
+        # Split message if too long (rough method, could be improved)
+        for i in range(0, len(formatted_triggers), 80):  # 80 items per message chunk
+            chunk = "*Available Filters:*\n" + "\n".join(formatted_triggers[i:i+80])
+            update.message.reply_text(chunk, parse_mode="Markdown")
     else:
-        update.message.reply_text("No filters found.")
+        update.message.reply_text(response, parse_mode="Markdown")
 
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
