@@ -50,6 +50,11 @@ def check_message(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
     user = update.effective_user
 
+    # Log incoming message (for debugging)
+    print(f"[DEBUG] Received message from {user.first_name} (ID: {user_id}) in Chat ID: {chat_id}")
+    print(f"[DEBUG] Message text: '{message.text}'")
+    print(f"[DEBUG] Message type: {message.content_type}")
+
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
     admin_ids = [admin.user.id for admin in chat_admins]
@@ -92,9 +97,12 @@ def check_message(update: Update, context: CallbackContext):
         normalized_message = message_text.strip().lower()  
         normalized_trigger = trigger.strip().lower()
 
-        # Use regex to search for the trigger anywhere in the message
-        if re.search(r'\b' + re.escape(normalized_trigger) + r'\b', normalized_message):
-            print(f"[FILTER MATCH] Trigger: '{trigger}'")
+        # Log the trigger and normalized message for debugging
+        print(f"[DEBUG] Checking for trigger: '{normalized_trigger}' in message: '{normalized_message}'")
+
+        # Remove word boundary markers and test matching directly
+        if normalized_trigger in normalized_message:
+            print(f"[FILTER MATCH] Trigger: '{trigger}' matched in message: '{normalized_message}'")
 
             response_text = filter_data.get("response_text", "")
             media_file = filter_data.get("media")
