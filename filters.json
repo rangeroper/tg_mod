@@ -170,9 +170,9 @@
     "type": "video"
   },
   "/se_arc_h": {
-    "response_text": "search.mp4",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "search.mp4",
+    "type": "video"
   },
   "se-arc-h": {
     "response_text": "",
