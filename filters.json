@@ -75,59 +75,59 @@
     "type": "video"
   },
   "/give_us_sol": {
-    "response_text": "Placeholder response for /give_us_sol",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "give_us_sol.mp4",
+    "type": "video"
   },
   "/sort_us_out": {
-    "response_text": "Placeholder response for /sort_us_out",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "sort_us_out.jpg",
+    "type": "image"
   },
   "/the_complex": {
-    "response_text": "Placeholder response for /the_complex",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "the_complex.mp4",
+    "type": "video"
   },
   "/alanturing": {
-    "response_text": "Placeholder response for /alanturing",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "alan_turing.mp4",
+    "type": "video"
   },
   "/arc_angels": {
-    "response_text": "Placeholder response for /arc_angels",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "arc_angels.mp4",
+    "type": "video"
   },
   "/arc_begins": {
-    "response_text": "Placeholder response for /arc_begins",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "arc_begins.mp4",
+    "type": "video"
   },
   "/arc_x_tank": {
-    "response_text": "Placeholder response for /arc_x_tank",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "arc_x_tank.mp4",
+    "type": "video"
   },
   "/tokenomics": {
-    "response_text": "Placeholder response for /tokenomics",
+    "response_text": "https://www.arc.fun/tokenomics",
     "media": null,
     "type": "text"
   },
   "/what_is_it": {
-    "response_text": "Placeholder response for /what_is_it",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "what_is_it.mp4",
+    "type": "video"
   },
   "/which_pill": {
-    "response_text": "Placeholder response for /which_pill",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "which_pill.jpg",
+    "type": "image"
   },
   "/arc_merch": {
-    "response_text": "Placeholder response for /arc_merch",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "arc_merch.mov",
+    "type": "video"
   },
   "/build_rig": {
     "response_text": "Placeholder response for /build_rig",
