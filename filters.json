@@ -6,7 +6,7 @@
   },
   "/are_you_pilled_yet": {
     "response_text": "",
-    "media": "are_you_pilled_yet.mp4",
+    "media": "/are_you_pilled_yet.mp4",
     "type": "video"
   },
   "/handshake_complete": {
