@@ -12,15 +12,15 @@ load_dotenv()  # Load .env vars
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 # File path for filters
-FILTERS_FILE = "filters.json"
+FILTERS_FILE = "filters/filters.json"
 
 # File path for accompanying filter media
 MEDIA_FOLDER = "media"
 
 # File paths for phrases
-BAN_PHRASES_FILE = "ban_phrases.txt"
-MUTE_PHRASES_FILE = "mute_phrases.txt"
-DELETE_PHRASES = "delete_phrases.txt"
+BAN_PHRASES_FILE = "blocklists/ban_phrases.txt"
+MUTE_PHRASES_FILE = "blocklists/mute_phrases.txt"
+DELETE_PHRASES = "blocklists/delete_phrases.txt"
 
 # Mute duration in seconds (3 days)
 MUTE_DURATION = 3 * 24 * 60 * 60
