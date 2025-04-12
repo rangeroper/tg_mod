@@ -88,10 +88,12 @@ def check_message(update: Update, context: CallbackContext):
             
     # Filter Responses (apply to all)
     for trigger, filter_data in FILTERS.items():
-        normalized_message = message_text.strip().lower()  # Normalize message
-        normalized_trigger = trigger.strip().lower()  # Normalize trigger
+        # Normalize message and trigger
+        normalized_message = message_text.strip().lower()  
+        normalized_trigger = trigger.strip().lower()
 
-        if normalized_trigger in normalized_message:  # Check if trigger exists anywhere in the message
+        # Use regex to search for the trigger anywhere in the message
+        if re.search(r'\b' + re.escape(normalized_trigger) + r'\b', normalized_message):
             print(f"[FILTER MATCH] Trigger: '{trigger}'")
 
             response_text = filter_data.get("response_text", "")
