@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
 from datetime import timedelta
 import re
 import json
@@ -131,11 +131,28 @@ def check_message(update: Update, context: CallbackContext):
                     message.reply_text(response_text)
 
             return  # Only respond to first matched filter
+        
+def list_filters(update: Update, context: CallbackContext):
+    # Grab only unique command-style filters (those starting with "/")
+    filter_keys = [key for key in FILTERS.keys() if key.startswith("/")]
+    filter_keys = sorted(set(filter_keys))  # Sort & deduplicate
+
+    if filter_keys:
+        response = "\n".join(filter_keys)
+        update.message.reply_text(f"Available filters:\n{response}")
+    else:
+        update.message.reply_text("No filters found.")
 
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
+
+    # output filters
+    dp.add_handler(CommandHandler("filters", list_filters))
+
+    # Add text and command message handler
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
+
     updater.start_polling()
     updater.idle()
 
