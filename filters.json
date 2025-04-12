@@ -1,7 +1,317 @@
 {
   "agenttank_handshake": {
-    "response_text": "🤝 https://www.arc.fun/details/tank\nhttps://x.com/arcdotfun/status/1899196887565324583",
+    "response_text": "https://www.arc.fun/details/tank\nhttps://x.com/arcdotfun/status/1899196887565324583",
     "media": "agenttank_handshake.mp4",
     "type": "video"
+  },
+  "/are_you_pilled_yet": {
+    "response_text": "",
+    "media": "are_you_pilled_yet.mp4",
+    "type": "video"
+  },
+  "/handshake_complete": {
+    "response_text": "Placeholder response for /handshake_complete",
+    "media": null,
+    "type": "text"
+  },
+  "handshake_complete": {
+    "response_text": "Placeholder response for handshake_complete",
+    "media": null,
+    "type": "text"
+  },
+  "fabelis_handshake": {
+    "response_text": "Placeholder response for fabelis_handshake",
+    "media": null,
+    "type": "text"
+  },
+  "/join_the_ryzome": {
+    "response_text": "Placeholder response for /join_the_ryzome",
+    "media": null,
+    "type": "text"
+  },
+  "/rig_trading_kit": {
+    "response_text": "Placeholder response for /rig_trading_kit",
+    "media": null,
+    "type": "text"
+  },
+  "/what_is_coming": {
+    "response_text": "Placeholder response for /what_is_coming",
+    "media": null,
+    "type": "text"
+  },
+  "/arc_ecosystem": {
+    "response_text": "Placeholder response for /arc_ecosystem",
+    "media": null,
+    "type": "text"
+  },
+  "/make_me_smile": {
+    "response_text": "Placeholder response for /make_me_smile",
+    "media": null,
+    "type": "text"
+  },
+  "/wake_up_degen": {
+    "response_text": "Placeholder response for /wake_up_degen",
+    "media": null,
+    "type": "text"
+  },
+  "/arc_watching": {
+    "response_text": "Placeholder response for /arc_watching",
+    "media": null,
+    "type": "text"
+  },
+  "/stay_curious": {
+    "response_text": "Placeholder response for /stay_curious",
+    "media": null,
+    "type": "text"
+  },
+  "/the_prologue": {
+    "response_text": "Placeholder response for /the_prologue",
+    "media": null,
+    "type": "text"
+  },
+  "/get_ryzomed": {
+    "response_text": "Placeholder response for /get_ryzomed",
+    "media": null,
+    "type": "text"
+  },
+  "/give_us_sol": {
+    "response_text": "Placeholder response for /give_us_sol",
+    "media": null,
+    "type": "text"
+  },
+  "/sort_us_out": {
+    "response_text": "Placeholder response for /sort_us_out",
+    "media": null,
+    "type": "text"
+  },
+  "/the_complex": {
+    "response_text": "Placeholder response for /the_complex",
+    "media": null,
+    "type": "text"
+  },
+  "/alanturing": {
+    "response_text": "Placeholder response for /alanturing",
+    "media": null,
+    "type": "text"
+  },
+  "/arc_angels": {
+    "response_text": "Placeholder response for /arc_angels",
+    "media": null,
+    "type": "text"
+  },
+  "/arc_begins": {
+    "response_text": "Placeholder response for /arc_begins",
+    "media": null,
+    "type": "text"
+  },
+  "/arc_x_tank": {
+    "response_text": "Placeholder response for /arc_x_tank",
+    "media": null,
+    "type": "text"
+  },
+  "/tokenomics": {
+    "response_text": "Placeholder response for /tokenomics",
+    "media": null,
+    "type": "text"
+  },
+  "/what_is_it": {
+    "response_text": "Placeholder response for /what_is_it",
+    "media": null,
+    "type": "text"
+  },
+  "/which_pill": {
+    "response_text": "Placeholder response for /which_pill",
+    "media": null,
+    "type": "text"
+  },
+  "/arc_merch": {
+    "response_text": "Placeholder response for /arc_merch",
+    "media": null,
+    "type": "text"
+  },
+  "/build_rig": {
+    "response_text": "Placeholder response for /build_rig",
+    "media": null,
+    "type": "text"
+  },
+  "dev wallet": {
+    "response_text": "Placeholder response for dev wallet",
+    "media": null,
+    "type": "text"
+  },
+  "playground": {
+    "response_text": "Placeholder response for playground",
+    "media": null,
+    "type": "text"
+  },
+  "/we_evolve": {
+    "response_text": "Placeholder response for /we_evolve",
+    "media": null,
+    "type": "text"
+  },
+  "what_is_it": {
+    "response_text": "Placeholder response for what_is_it",
+    "media": null,
+    "type": "text"
+  },
+  "/archtech": {
+    "response_text": "Placeholder response for /archtech",
+    "media": null,
+    "type": "text"
+  },
+  "handshake": {
+    "response_text": "Placeholder response for handshake",
+    "media": null,
+    "type": "text"
+  },
+  "litepaper": {
+    "response_text": "Placeholder response for litepaper",
+    "media": null,
+    "type": "text"
+  },
+  "/se.arc.h": {
+    "response_text": "Placeholder response for /se.arc.h",
+    "media": null,
+    "type": "text"
+  },
+  "/se_arc_h": {
+    "response_text": "Placeholder response for /se_arc_h",
+    "media": null,
+    "type": "text"
+  },
+  "/chinese": {
+    "response_text": "Placeholder response for /chinese",
+    "media": null,
+    "type": "text"
+  },
+  "/roadmap": {
+    "response_text": "Placeholder response for /roadmap",
+    "media": null,
+    "type": "text"
+  },
+  "se-arc-h": {
+    "response_text": "Placeholder response for se-arc-h",
+    "media": null,
+    "type": "text"
+  },
+  "telegram": {
+    "response_text": "Placeholder response for telegram",
+    "media": null,
+    "type": "text"
+  },
+  "discord": {
+    "response_text": "Placeholder response for discord",
+    "media": null,
+    "type": "text"
+  },
+  "/emblem": {
+    "response_text": "Placeholder response for /emblem",
+    "media": null,
+    "type": "text"
+  },
+  "twitter": {
+    "response_text": "Placeholder response for twitter",
+    "media": null,
+    "type": "text"
+  },
+  "/we_arc": {
+    "response_text": "Placeholder response for /we_arc",
+    "media": null,
+    "type": "text"
+  },
+  "website": {
+    "response_text": "Placeholder response for website",
+    "media": null,
+    "type": "text"
+  },
+  "/aa#00": {
+    "response_text": "Placeholder response for /aa#00",
+    "media": null,
+    "type": "text"
+  },
+  "github": {
+    "response_text": "Placeholder response for github",
+    "media": null,
+    "type": "text"
+  },
+  "/hello": {
+    "response_text": "Placeholder response for /hello",
+    "media": null,
+    "type": "text"
+  },
+  "/ready": {
+    "response_text": "Placeholder response for /ready",
+    "media": null,
+    "type": "text"
+  },
+  "search": {
+    "response_text": "Placeholder response for search",
+    "media": null,
+    "type": "text"
+  },
+  "/aa00": {
+    "response_text": "Placeholder response for /aa00",
+    "media": null,
+    "type": "text"
+  },
+  "forge": {
+    "response_text": "Placeholder response for forge",
+    "media": null,
+    "type": "text"
+  },
+  "/shhh": {
+    "response_text": "Placeholder response for /shhh",
+    "media": null,
+    "type": "text"
+  },
+  "ama1": {
+    "response_text": "Placeholder response for ama1",
+    "media": null,
+    "type": "text"
+  },
+  "/arc": {
+    "response_text": "Placeholder response for /arc",
+    "media": null,
+    "type": "text"
+  },
+  "/cex": {
+    "response_text": "Placeholder response for /cex",
+    "media": null,
+    "type": "text"
+  },
+  "pump": {
+    "response_text": "Placeholder response for pump",
+    "media": null,
+    "type": "text"
+  },
+  "site": {
+    "response_text": "Placeholder response for site",
+    "media": null,
+    "type": "text"
+  },
+  "ama": {
+    "response_text": "Placeholder response for ama",
+    "media": null,
+    "type": "text"
+  },
+  "/ar": {
+    "response_text": "Placeholder response for /ar",
+    "media": null,
+    "type": "text"
+  },
+  "dex": {
+    "response_text": "Placeholder response for dex",
+    "media": null,
+    "type": "text"
+  },
+  "ca": {
+    "response_text": "Placeholder response for ca",
+    "media": null,
+    "type": "text"
+  },
+  "pg": {
+    "response_text": "Placeholder response for pg",
+    "media": null,
+    "type": "text"
   }
 }
