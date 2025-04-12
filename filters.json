@@ -130,84 +130,79 @@
     "type": "video"
   },
   "/build_rig": {
-    "response_text": "Placeholder response for /build_rig",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "build_rig.mp4",
+    "type": "video"
   },
   "dev wallet": {
-    "response_text": "Placeholder response for dev wallet",
+    "response_text": "https://solscan.io/account/FXkGydbnG4jHVYqbBWWG4kkkwCpz6YEeVtM1vA6kZLaS",
     "media": null,
     "type": "text"
   },
   "playground": {
-    "response_text": "Placeholder response for playground",
+    "response_text": "https://rig.rs/",
     "media": null,
     "type": "text"
   },
   "/we_evolve": {
-    "response_text": "Placeholder response for /we_evolve",
-    "media": null,
-    "type": "text"
-  },
-  "what_is_it": {
-    "response_text": "Placeholder response for what_is_it",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "we_evolve.mp4",
+    "type": "video"
   },
   "/archtech": {
-    "response_text": "Placeholder response for /archtech",
+    "response_text": "https://www.arc.fun/architecture",
     "media": null,
     "type": "text"
   },
   "handshake": {
-    "response_text": "Placeholder response for handshake",
+    "response_text": "arc.fun/handshake",
     "media": null,
     "type": "text"
   },
   "litepaper": {
-    "response_text": "Placeholder response for litepaper",
+    "response_text": "https://x.com/0thTachi/status/1898115871425675634",
     "media": null,
     "type": "text"
   },
   "/se.arc.h": {
-    "response_text": "Placeholder response for /se.arc.h",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "search.mp4",
+    "type": "video"
   },
   "/se_arc_h": {
-    "response_text": "Placeholder response for /se_arc_h",
-    "media": null,
-    "type": "text"
-  },
-  "/chinese": {
-    "response_text": "Placeholder response for /chinese",
-    "media": null,
-    "type": "text"
-  },
-  "/roadmap": {
-    "response_text": "Placeholder response for /roadmap",
+    "response_text": "search.mp4",
     "media": null,
     "type": "text"
   },
   "se-arc-h": {
-    "response_text": "Placeholder response for se-arc-h",
+    "response_text": "",
+    "media": "search.mp4",
+    "type": "video"
+  },
+  "/chinese": {
+    "response_text": "抱歉！我们的中文指令被熊猫抱走了，正在抢救回来",
     "media": null,
     "type": "text"
   },
+  "/roadmap": {
+    "response_text": "",
+    "media": "roadmap.jpg",
+    "type": "image"
+  },
   "telegram": {
-    "response_text": "Placeholder response for telegram",
+    "response_text": "https://t.me/+CI-vivonuApiZWQ0",
     "media": null,
     "type": "text"
   },
   "discord": {
-    "response_text": "Placeholder response for discord",
+    "response_text": "https://discord.com/invite/playgrounds",
     "media": null,
     "type": "text"
   },
   "/emblem": {
-    "response_text": "Placeholder response for /emblem",
-    "media": null,
-    "type": "text"
+    "response_text": "throughout history, symbols have sparked revolutions, fueled movements, and galvanized individuals around a shared purpose.\n\nfrom ancient heraldry to modern insignias, an emblem is a rallying cry that captures the heart and vision of a community.\n\nwe build rig, rig builds us",
+    "media": "emblem.mp4",
+    "type": "video"
   },
   "twitter": {
     "response_text": "Placeholder response for twitter",

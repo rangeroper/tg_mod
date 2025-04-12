@@ -96,9 +96,6 @@ def check_message(update: Update, context: CallbackContext):
         normalized_message = message_text.strip().lower()  
         normalized_trigger = trigger.strip().lower()
 
-        # Log the trigger and normalized message for debugging
-        print(f"[DEBUG] Checking for trigger: '{normalized_trigger}' in message: '{normalized_message}'")
-
         if normalized_trigger in normalized_message:
             response_text = filter_data.get("response_text", "")
             media_file = filter_data.get("media")
