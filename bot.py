@@ -88,45 +88,47 @@ def check_message(update: Update, context: CallbackContext):
             
     # Filter Responses (apply to all)
     for trigger, filter_data in FILTERS.items():
-            if trigger in message_text:
-                print(f"[FILTER MATCH] Trigger: '{trigger}'")
+        normalized_message = message_text.strip().lower()  # Normalize message
+        normalized_trigger = trigger.strip().lower()  # Normalize trigger
 
-                response_text = filter_data.get("response_text", "")
-                media_file = filter_data.get("media")
-                media_type = filter_data.get("type", "gif").lower()  # Default to gif if not specified
+        if normalized_trigger in normalized_message:  # Check if trigger exists anywhere in the message
+            print(f"[FILTER MATCH] Trigger: '{trigger}'")
 
-                if media_file:
-                    media_path = os.path.join(MEDIA_FOLDER, media_file)
+            response_text = filter_data.get("response_text", "")
+            media_file = filter_data.get("media")
+            media_type = filter_data.get("type", "gif").lower()  # Default to gif if not specified
 
-                    if os.path.exists(media_path):
-                        with open(media_path, 'rb') as media:
-                            if media_type == "gif" or media_type == "animation":
-                                if response_text:
-                                    context.bot.send_animation(chat_id=chat_id, animation=media, caption=response_text)
-                                else:
-                                    context.bot.send_animation(chat_id=chat_id, animation=media)
-                            elif media_type == "image":
-                                if response_text:
-                                    context.bot.send_photo(chat_id=chat_id, photo=media, caption=response_text)
-                                else:
-                                    context.bot.send_photo(chat_id=chat_id, photo=media)
-                            elif media_type == "video":
-                                if response_text:
-                                    context.bot.send_video(chat_id=chat_id, video=media, caption=response_text)
-                                else:
-                                    context.bot.send_video(chat_id=chat_id, video=media)
+            if media_file:
+                media_path = os.path.join(MEDIA_FOLDER, media_file)
+
+                if os.path.exists(media_path):
+                    with open(media_path, 'rb') as media:
+                        if media_type == "gif" or media_type == "animation":
+                            if response_text:
+                                context.bot.send_animation(chat_id=chat_id, animation=media, caption=response_text)
                             else:
-                                print(f"[WARN] Unknown media type '{media_type}' for trigger '{trigger}'")
-                    else:
-                        print(f"[ERROR] Media file '{media_path}' not found.")
-                        if response_text:
-                            message.reply_text(response_text)
+                                context.bot.send_animation(chat_id=chat_id, animation=media)
+                        elif media_type == "image":
+                            if response_text:
+                                context.bot.send_photo(chat_id=chat_id, photo=media, caption=response_text)
+                            else:
+                                context.bot.send_photo(chat_id=chat_id, photo=media)
+                        elif media_type == "video":
+                            if response_text:
+                                context.bot.send_video(chat_id=chat_id, video=media, caption=response_text)
+                            else:
+                                context.bot.send_video(chat_id=chat_id, video=media)
+                        else:
+                            print(f"[WARN] Unknown media type '{media_type}' for trigger '{trigger}'")
                 else:
+                    print(f"[ERROR] Media file '{media_path}' not found.")
                     if response_text:
                         message.reply_text(response_text)
+            else:
+                if response_text:
+                    message.reply_text(response_text)
 
-
-                return  # Only respond to first matched filter
+            return  # Only respond to first matched filter
 
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
