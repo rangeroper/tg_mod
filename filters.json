@@ -179,6 +179,11 @@
     "media": "search.mp4",
     "type": "video"
   },
+  "search": {
+    "response_text": "",
+    "media": "search.mp4",
+    "type": "video"
+  },
   "/chinese": {
     "response_text": "抱歉！我们的中文指令被熊猫抱走了，正在抢救回来",
     "media": null,
@@ -205,107 +210,97 @@
     "type": "video"
   },
   "twitter": {
-    "response_text": "Placeholder response for twitter",
+    "response_text": "https://twitter.com/arcdotfun",
     "media": null,
     "type": "text"
   },
   "/we_arc": {
-    "response_text": "Placeholder response for /we_arc",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "we_arc.mp4",
+    "type": "video"
   },
   "website": {
-    "response_text": "Placeholder response for website",
+    "response_text": "arc.fun",
     "media": null,
     "type": "text"
   },
   "/aa#00": {
-    "response_text": "Placeholder response for /aa#00",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "aa#00.mp4",
+    "type": "video"
+  },
+  "/aa00": {
+    "response_text": "",
+    "media": "aa#00.mp4",
+    "type": "video"
   },
   "github": {
-    "response_text": "Placeholder response for github",
+    "response_text": "https://github.com/0xplaygrounds/rig",
     "media": null,
     "type": "text"
   },
   "/hello": {
-    "response_text": "Placeholder response for /hello",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "ready.mp4",
+    "type": "video"
   },
   "/ready": {
-    "response_text": "Placeholder response for /ready",
-    "media": null,
-    "type": "text"
-  },
-  "search": {
-    "response_text": "Placeholder response for search",
-    "media": null,
-    "type": "text"
-  },
-  "/aa00": {
-    "response_text": "Placeholder response for /aa00",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "ready.mp4",
+    "type": "video"
   },
   "forge": {
-    "response_text": "Placeholder response for forge",
+    "response_text": "https://www.arc.fun/forge",
     "media": null,
     "type": "text"
   },
   "/shhh": {
-    "response_text": "Placeholder response for /shhh",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "arc_white.jpg",
+    "type": "image"
   },
   "ama1": {
-    "response_text": "Placeholder response for ama1",
+    "response_text": "https://x.com/RangeRope/status/1872441471472910371",
     "media": null,
     "type": "text"
   },
   "/arc": {
-    "response_text": "Placeholder response for /arc",
+    "response_text": "⸅◟_◞⸅",
     "media": null,
     "type": "text"
   },
   "/cex": {
-    "response_text": "Placeholder response for /cex",
-    "media": null,
-    "type": "text"
-  },
-  "pump": {
-    "response_text": "Placeholder response for pump",
+    "response_text": "Kucoin, Bitget, Lbank, Bitmart, XT, Poloniex, Mexc, Coinex, Ourbit, Bitmax, KCEX, gate io, Bybit, Coin W",
     "media": null,
     "type": "text"
   },
   "site": {
-    "response_text": "Placeholder response for site",
+    "response_text": "arc.fun",
     "media": null,
     "type": "text"
   },
   "ama": {
-    "response_text": "Placeholder response for ama",
+    "response_text": "https://x.com/0thTachi/status/1876377934652412160",
     "media": null,
     "type": "text"
   },
   "/ar": {
-    "response_text": "Placeholder response for /ar",
+    "response_text": "https://www.arc.fun/registry",
     "media": null,
     "type": "text"
   },
   "dex": {
-    "response_text": "Placeholder response for dex",
+    "response_text": "https://dexscreener.com/solana/j3b6dvhes2y1cbmtvz5tcwxnegsjjdbukxduvdpoqms7",
     "media": null,
     "type": "text"
   },
   "ca": {
-    "response_text": "Placeholder response for ca",
+    "response_text": "61V8vBaqAGMpgDQi4JcAwo1dmBGHsyhzodcPqnEVpump",
     "media": null,
     "type": "text"
   },
   "pg": {
-    "response_text": "Placeholder response for pg",
+    "response_text": "https://rig.rs/",
     "media": null,
     "type": "text"
   }
