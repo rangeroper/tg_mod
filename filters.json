@@ -10,34 +10,34 @@
     "type": "video"
   },
   "/handshake_complete": {
-    "response_text": "Placeholder response for /handshake_complete",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "handshake_complete.mp4",
+    "type": "video"
   },
   "handshake_complete": {
-    "response_text": "Placeholder response for handshake_complete",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "handshake_complete.mp4",
+    "type": "video"
   },
   "fabelis_handshake": {
-    "response_text": "Placeholder response for fabelis_handshake",
-    "media": null,
-    "type": "text"
+    "response_text": "https://www.arc.fun/details/fabel\nhttps://x.com/arcdotfun/status/1899181979662270778",
+    "media": "fabelis_handshake.mp4",
+    "type": "video"
   },
   "/join_the_ryzome": {
-    "response_text": "Placeholder response for /join_the_ryzome",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "join_the_ryzome.mp4",
+    "type": "video"
   },
   "/rig_trading_kit": {
-    "response_text": "Placeholder response for /rig_trading_kit",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "rig_trading_kit.mp4",
+    "type": "video"
   },
   "/what_is_coming": {
-    "response_text": "Placeholder response for /what_is_coming",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "what_is_coming.mp4",
+    "type": "video"
   },
   "/arc_ecosystem": {
     "response_text": "Placeholder response for /arc_ecosystem",
