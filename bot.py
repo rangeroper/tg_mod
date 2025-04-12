@@ -53,7 +53,16 @@ def check_message(update: Update, context: CallbackContext):
     # Log incoming message (for debugging)
     print(f"[DEBUG] Received message from {user.first_name} (ID: {user_id}) in Chat ID: {chat_id}")
     print(f"[DEBUG] Message text: '{message.text}'")
-    print(f"[DEBUG] Message type: {message.content_type}")
+    
+    # Log the content type by checking the specific attributes
+    if message.text:
+        print(f"[DEBUG] Message is text.")
+    elif message.photo:
+        print(f"[DEBUG] Message is a photo.")
+    elif message.video:
+        print(f"[DEBUG] Message is a video.")
+    else:
+        print(f"[DEBUG] Message type is not recognized.")
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
@@ -100,7 +109,6 @@ def check_message(update: Update, context: CallbackContext):
         # Log the trigger and normalized message for debugging
         print(f"[DEBUG] Checking for trigger: '{normalized_trigger}' in message: '{normalized_message}'")
 
-        # Remove word boundary markers and test matching directly
         if normalized_trigger in normalized_message:
             print(f"[FILTER MATCH] Trigger: '{trigger}' matched in message: '{normalized_message}'")
 
