@@ -40,14 +40,14 @@
     "type": "video"
   },
   "/arc_ecosystem": {
-    "response_text": "Placeholder response for /arc_ecosystem",
+    "response_text": "https://t.me/c/2303317223/138119",
     "media": null,
     "type": "text"
   },
   "/make_me_smile": {
-    "response_text": "Placeholder response for /make_me_smile",
-    "media": null,
-    "type": "text"
+    "response_text": "https://www.arc.fun/emblem",
+    "media": "make_me_smile.jpg",
+    "type": "image"
   },
   "/wake_up_degen": {
     "response_text": "Placeholder response for /wake_up_degen",
