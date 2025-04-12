@@ -53,10 +53,6 @@ def check_message(update: Update, context: CallbackContext):
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
     admin_ids = [admin.user.id for admin in chat_admins]
-    
-    if user_id in admin_ids:
-        print("[DEBUG] Skipping action for an admin or owner.")
-        return
 
     if not message or not message.text:
         return  # Skip non-text or unsupported messages
