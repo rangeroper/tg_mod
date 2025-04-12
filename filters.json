@@ -50,29 +50,29 @@
     "type": "image"
   },
   "/wake_up_degen": {
-    "response_text": "Placeholder response for /wake_up_degen",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "wake_up_degen.mp4",
+    "type": "video"
   },
   "/arc_watching": {
-    "response_text": "Placeholder response for /arc_watching",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "arc_watching.mp4",
+    "type": "video"
   },
   "/stay_curious": {
-    "response_text": "Placeholder response for /stay_curious",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "stay_curious.mp4",
+    "type": "video"
   },
   "/the_prologue": {
-    "response_text": "Placeholder response for /the_prologue",
-    "media": null,
-    "type": "text"
+    "response_text": "",
+    "media": "the_prologue.mp4",
+    "type": "video"
   },
   "/get_ryzomed": {
-    "response_text": "Placeholder response for /get_ryzomed",
-    "media": null,
-    "type": "text"
+    "response_text": "/join_the_ryzome",
+    "media": "join_the_ryzome.mp4",
+    "type": "video"
   },
   "/give_us_sol": {
     "response_text": "Placeholder response for /give_us_sol",
