@@ -53,16 +53,6 @@ def check_message(update: Update, context: CallbackContext):
     # Log incoming message (for debugging)
     print(f"[DEBUG] Received message from {user.first_name} (ID: {user_id}) in Chat ID: {chat_id}")
     print(f"[DEBUG] Message text: '{message.text}'")
-    
-    # Log the content type by checking the specific attributes
-    if message.text:
-        print(f"[DEBUG] Message is text.")
-    elif message.photo:
-        print(f"[DEBUG] Message is a photo.")
-    elif message.video:
-        print(f"[DEBUG] Message is a video.")
-    else:
-        print(f"[DEBUG] Message type is not recognized.")
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
@@ -151,7 +141,7 @@ def check_message(update: Update, context: CallbackContext):
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_message))
+    dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
     updater.start_polling()
     updater.idle()
 
