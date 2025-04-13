@@ -27,3 +27,5 @@ i earned
 click here
 shill me
 old solana wallet
+old empty wallet
+wallet with many transactions
