@@ -65,6 +65,11 @@ def check_message(update: Update, context: CallbackContext):
     print(f"[DEBUG] Received message: '{message_text}' from user: {user.first_name} (ID: {user_id})")
 
     if user_id not in admin_ids:
+        # Reject spam messages (under 2 characters total)
+        if len(message_text.strip()) < 2:
+            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            return
+
         # Check for ban phrases
         for phrase in BAN_PHRASES:
             if phrase in message_text:
