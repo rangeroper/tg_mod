@@ -20,7 +20,6 @@ w m
 now aiming
 dum.p
 dum p
-.
 ai16z
 tried to warn you
 a i 1 6 z
