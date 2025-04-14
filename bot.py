@@ -41,6 +41,11 @@ BAN_PHRASES = load_phrases(BAN_PHRASES_FILE)
 MUTE_PHRASES = load_phrases(MUTE_PHRASES_FILE)
 DELETE_PHRASES = load_phrases(DELETE_PHRASES)
 
+# Suspicious names to auto-ban
+SUSPICIOUS_USERNAMES = [
+    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent", "support", "helpdesk"
+]
+
 def check_message(update: Update, context: CallbackContext):
     print(f"[DEBUG] Chat ID: {update.effective_chat.id}")
 
@@ -57,6 +62,13 @@ def check_message(update: Update, context: CallbackContext):
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
     admin_ids = [admin.user.id for admin in chat_admins]
+
+    # Auto-ban based on suspicious name or username
+    name_username = f"{user.full_name} {user.username or ''}".lower()
+
+    if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
+        context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+        return
 
     if not message or not message.text:
         return  # Skip non-text or unsupported messages
@@ -151,7 +163,6 @@ def list_filters(update: Update, context: CallbackContext):
     # Telegram messages max out at 4096 characters
     response = "*Available Filters:*\n" + "\n".join(formatted_triggers)
     if len(response) > 4000:
-        # Split message if too long (rough method, could be improved)
         for i in range(0, len(formatted_triggers), 80):  # 80 items per message chunk
             chunk = "*Available Filters:*\n" + "\n".join(formatted_triggers[i:i+80])
             update.message.reply_text(chunk, parse_mode="Markdown")
