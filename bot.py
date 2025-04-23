@@ -60,9 +60,14 @@ def check_message(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
     user = update.effective_user
 
+    if not message or not message.text:
+        return  # Skip non-text or unsupported messages
+    
+    message_text = message.text.lower()
+
     # Log incoming message (for debugging)
     print(f"[DEBUG] Received message from {user.first_name} (ID: {user_id}) in Chat ID: {chat_id}")
-    print(f"[DEBUG] Message text: '{message.text}'")
+    print(f"[DEBUG] Message text: '{message_text}'")
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
@@ -70,29 +75,21 @@ def check_message(update: Update, context: CallbackContext):
 
     # Auto-ban based on suspicious name or username
     name_username = f"{user.full_name} {user.username or ''}".lower()
-
+    
     if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
         context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
         return
-    
+
+    # Check for multiplication spam
     if contains_multiplication_phrase(message_text):
         context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
         return
 
-
-    if not message or not message.text:
-        return  # Skip non-text or unsupported messages
-
-    message_text = message.text.lower()
-    print(f"[DEBUG] Received message: '{message_text}' from user: {user.first_name} (ID: {user_id})")
-
     if user_id not in admin_ids:
-        # Reject spam messages (under 2 characters total)
         if len(message_text.strip()) < 2:
             context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
 
-        # Check for ban phrases
         for phrase in BAN_PHRASES:
             if phrase in message_text:
                 print(f"[BAN MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
@@ -100,7 +97,6 @@ def check_message(update: Update, context: CallbackContext):
                 message.reply_text(f"arc angel fallen. {user.first_name} has been banned.")
                 return
 
-        # Check for mute phrases
         for phrase in MUTE_PHRASES:
             if phrase in message_text:
                 print(f"[MUTE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
@@ -110,54 +106,36 @@ def check_message(update: Update, context: CallbackContext):
                 message.reply_text(f"{user.first_name} has been muted for 3 days.")
                 return
 
-        # Check for delete phrases
         for phrase in DELETE_PHRASES:
             if phrase in message_text:
                 print(f"[DELETE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
                 context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
                 return
-            
+
     # Filter Responses (apply to all)
     for trigger, filter_data in FILTERS.items():
-        # Normalize message and trigger
-        normalized_message = message_text.strip().lower()  
         normalized_trigger = trigger.strip().lower()
-
-        if normalized_trigger in normalized_message:
+        if normalized_trigger in message_text:
             response_text = filter_data.get("response_text", "")
             media_file = filter_data.get("media")
-            media_type = filter_data.get("type", "gif").lower()  # Default to gif if not specified
+            media_type = filter_data.get("type", "gif").lower()
 
             if media_file:
                 media_path = os.path.join(MEDIA_FOLDER, media_file)
-
                 if os.path.exists(media_path):
                     with open(media_path, 'rb') as media:
-                        if media_type == "gif" or media_type == "animation":
-                            if response_text:
-                                context.bot.send_animation(chat_id=chat_id, animation=media, caption=response_text)
-                            else:
-                                context.bot.send_animation(chat_id=chat_id, animation=media)
+                        if media_type in ["gif", "animation"]:
+                            context.bot.send_animation(chat_id=chat_id, animation=media, caption=response_text or None)
                         elif media_type == "image":
-                            if response_text:
-                                context.bot.send_photo(chat_id=chat_id, photo=media, caption=response_text)
-                            else:
-                                context.bot.send_photo(chat_id=chat_id, photo=media)
+                            context.bot.send_photo(chat_id=chat_id, photo=media, caption=response_text or None)
                         elif media_type == "video":
-                            if response_text:
-                                context.bot.send_video(chat_id=chat_id, video=media, caption=response_text)
-                            else:
-                                context.bot.send_video(chat_id=chat_id, video=media)
-                        else:
-                            print(f"[WARN] Unknown media type '{media_type}' for trigger '{trigger}'")
-                else:
-                    if response_text:
-                        message.reply_text(response_text)
-            else:
-                if response_text:
+                            context.bot.send_video(chat_id=chat_id, video=media, caption=response_text or None)
+                elif response_text:
                     message.reply_text(response_text)
+            elif response_text:
+                message.reply_text(response_text)
+            return  # Respond only once
 
-            return  # Only respond to first matched filter
         
 def list_filters(update: Update, context: CallbackContext):
     # Load the latest filters
