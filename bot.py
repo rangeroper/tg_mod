@@ -48,7 +48,7 @@ SUSPICIOUS_USERNAMES = [
 
 def contains_multiplication_phrase(text):
     text = text.lower()
-    pattern = r"\b(?:[1-9][0-9]{0,2}|1000)\s*x\s*|\bx\s*(?:[1-9][0-9]{0,2}|1000)\b"
+    pattern = r"\b(?:[1-9][0-9]{0,3}|10000)\s*x\s*|\bx\s*(?:[1-9][0-9]{0,3}|10000)\b"
     return re.search(pattern, text)
 
 def check_message(update: Update, context: CallbackContext):
