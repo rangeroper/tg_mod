@@ -46,6 +46,11 @@ SUSPICIOUS_USERNAMES = [
     "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent", "support", "helpdesk"
 ]
 
+def contains_multiplication_phrase(text):
+    text = text.lower()
+    pattern = r"\b(?:[1-9][0-9]{0,2}|1000)\s*x\s*|\bx\s*(?:[1-9][0-9]{0,2}|1000)\b"
+    return re.search(pattern, text)
+
 def check_message(update: Update, context: CallbackContext):
     print(f"[DEBUG] Chat ID: {update.effective_chat.id}")
 
@@ -69,6 +74,11 @@ def check_message(update: Update, context: CallbackContext):
     if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
         context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
         return
+    
+    if contains_multiplication_phrase(message_text):
+        context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+        return
+
 
     if not message or not message.text:
         return  # Skip non-text or unsupported messages
