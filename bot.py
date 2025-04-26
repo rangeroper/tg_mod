@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
 from datetime import timedelta
 from combot.scheduled_warnings import messages
 import re
@@ -11,6 +11,7 @@ load_dotenv()  # Load .env vars
 
 # Get bot token from environment
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+GROUP_CHAT_ID = os.getenv('GROUP_CHAT_ID')
 
 # File path for filters
 FILTERS_FILE = "filters/filters.json"
@@ -34,11 +35,12 @@ def get_chat_ids(update: Update, context: CallbackContext):
     print(f"Chat ID for {group_name}: {chat_id}")
     update.message.reply_text(f"Chat ID for {group_name}: {chat_id}")
 
-#def post_security_message(context: CallbackContext):
-    #global message_index
-    #message = messages[message_index]
-    #context.bot.send_message(chat_id=TARGET_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
-    #message_index = (message_index + 1) % len(messages)
+def post_security_message(context: CallbackContext):
+    global message_index
+    message = messages[message_index]
+    # Send to the single group chat ID (both main and staging)
+    context.bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
+    message_index = (message_index + 1) % len(messages)
 
 def load_phrases(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -168,6 +170,12 @@ def list_filters(update: Update, context: CallbackContext):
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
+
+    # Get the JobQueue from the dispatcher
+    job_queue = updater.job_queue
+
+    # Set up a job to send security messages every 5 minutes
+    job_queue.run_repeating(post_security_message, interval=5 * 60, first=0)  # Interval in seconds (5 minutes)
 
     # output filters
     dp.add_handler(CommandHandler("filters", list_filters))
