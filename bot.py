@@ -25,6 +25,7 @@ MEDIA_FOLDER = "media"
 BAN_PHRASES_FILE = "blocklists/ban_phrases.txt"
 MUTE_PHRASES_FILE = "blocklists/mute_phrases.txt"
 DELETE_PHRASES = "blocklists/delete_phrases.txt"
+WHITELIST_PHRASES = "whitelists/whitelist_phrases.txt"
 
 # Suspicious names to auto-ban
 SUSPICIOUS_USERNAMES = [
@@ -63,7 +64,7 @@ def load_filters(file_path):
 
 FILTERS = load_filters(FILTERS_FILE)
 
-# Load blocklist words/phrases from files
+# Load blocklist/whitelisted words/phrases from files
 def load_phrases(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return [line.strip().lower() for line in file.readlines()]
@@ -71,6 +72,7 @@ def load_phrases(file_path):
 BAN_PHRASES = load_phrases(BAN_PHRASES_FILE)
 MUTE_PHRASES = load_phrases(MUTE_PHRASES_FILE)
 DELETE_PHRASES = load_phrases(DELETE_PHRASES)
+WHITELIST_PHRASES = load_phrases(WHITELIST_PHRASES)
 
 def contains_multiplication_phrase(text):
     text = text.lower()
@@ -99,6 +101,11 @@ def check_for_spam(message_text, user_id):
         spammer_ids = list(set([entry[0] for entry in recent])) # Return list of user_ids to mute
         print(f"Flagging {len(spammer_ids)} users for spam: {spammer_ids}") 
         return spammer_ids
+    
+    elif recent and len(recent) < SPAM_THRESHOLD and (now - recent[0][1] > TIME_WINDOW):
+        # Not spam, expired window – clean it up
+        SPAM_TRACKER.pop(message_text, None)
+
     return []
 
 # mute spammers
@@ -111,6 +118,8 @@ def check_recent_spam(message_text):
 
 
 def check_message(update: Update, context: CallbackContext):
+    should_skip_spam_check = False
+    
     message = update.message or update.channel_post  # Handle both messages and channel posts
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -143,25 +152,40 @@ def check_message(update: Update, context: CallbackContext):
             context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
         
-        # auto spam detection
-        spammer_ids = check_for_spam(message_text, user_id)
+        # 1. autospam - check if its a command or matches a filter
+        for trigger in FILTERS.keys():
+            normalized_trigger = trigger.strip().lower()
+            pattern = rf'(?<!\w)/?{re.escape(normalized_trigger)}(_\w+)?(?!\w)'
+            if re.search(pattern, message_text):
+                should_skip_spam_check = True
+                print(f"[SPAM CHECK SKIPPED] Message '{message_text}' matched FILTER trigger: '{trigger}'")
+                break
 
-        if check_recent_spam(message_text):
-            if user_id not in spammer_ids:
+        # 2. autospam - check whitelist
+        if not should_skip_spam_check:
+            if message_text.strip() in WHITELIST_PHRASES:
+                print(f"[SPAM CHECK SKIPPED] Message '{message_text}' matched WHITELIST.")
+                should_skip_spam_check = True
+
+        if not should_skip_spam_check:
+            # Run spam detection only if no FILTER trigger matched
+            spammer_ids = check_for_spam(message_text, user_id)
+
+            if check_recent_spam(message_text) and user_id not in spammer_ids:
                 spammer_ids.append(user_id)
 
-        if spammer_ids:
-            print(f"Muting spammers for message: '{message_text}'")
-            for spammer_id in set(spammer_ids):
-                try:
-                    until_date = message.date + timedelta(seconds=MUTE_DURATION)
-                    permissions = ChatPermissions(can_send_messages=False)
-                    context.bot.restrict_chat_member(chat_id=chat_id, user_id=spammer_id, permissions=permissions, until_date=until_date)
-                    context.bot.send_message(chat_id=chat_id, text=f"User {spammer_id} has been muted for spamming identical messages.")
-                    print(f"Muted user {spammer_id} for spam message.")
-                except Exception as e:
-                    print(f"Failed to mute spammer {spammer_id}: {e}")
-            return                                       
+            if spammer_ids:
+                print(f"Muting spammers for message: '{message_text}'")
+                for spammer_id in set(spammer_ids):
+                    try:
+                        until_date = message.date + timedelta(seconds=MUTE_DURATION)
+                        permissions = ChatPermissions(can_send_messages=False)
+                        context.bot.restrict_chat_member(chat_id=chat_id, user_id=spammer_id, permissions=permissions, until_date=until_date)
+                        context.bot.send_message(chat_id=chat_id, text=f"User {spammer_id} has been muted for 3 days.")
+                        print(f"Muted user {spammer_id} for spam message.")
+                    except Exception as e:
+                        print(f"Failed to mute spammer {spammer_id}: {e}")
+                return
     
         # Check for banned phrases
         for phrase in BAN_PHRASES:
