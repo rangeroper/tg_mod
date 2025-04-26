@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
 from collections import defaultdict, deque
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time
 from combot.scheduled_warnings import messages
 from combot.brand_assets import messages as brand_assets_messages
 
@@ -249,8 +249,8 @@ def main():
     job_queue.run_repeating(post_security_message, interval=4 * 60 * 60, first=0)
 
     # Post brand assets message at 00:00 and 12:00
-    job_queue.run_daily(post_brand_assets, time=datetime.time(hour=0, minute=0))
-    job_queue.run_daily(post_brand_assets, time=datetime.time(hour=12, minute=0))
+    job_queue.run_daily(post_brand_assets, time=time(hour=0, minute=0))
+    job_queue.run_daily(post_brand_assets, time=time(hour=12, minute=0))
 
     # output filters
     dp.add_handler(CommandHandler("filters", list_filters))
