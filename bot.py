@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
-from telegram import Update, ChatPermissions
+from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
 from datetime import timedelta
+from combot.scheduled_warnings import messages
 import re
 import json
 
@@ -24,6 +25,20 @@ DELETE_PHRASES = "blocklists/delete_phrases.txt"
 
 # Mute duration in seconds (3 days)
 MUTE_DURATION = 3 * 24 * 60 * 60
+
+message_index = 0
+
+def get_chat_ids(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    group_name = update.effective_chat.title
+    print(f"Chat ID for {group_name}: {chat_id}")
+    update.message.reply_text(f"Chat ID for {group_name}: {chat_id}")
+
+#def post_security_message(context: CallbackContext):
+    #global message_index
+    #message = messages[message_index]
+    #context.bot.send_message(chat_id=TARGET_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
+    #message_index = (message_index + 1) % len(messages)
 
 def load_phrases(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -53,9 +68,6 @@ def contains_multiplication_phrase(text):
     return re.search(pattern, text)
 
 def check_message(update: Update, context: CallbackContext):
-    print(f"[DEBUG] Chat ID: {update.effective_chat.id}")
-
-def check_message(update: Update, context: CallbackContext):
     message = update.message or update.channel_post  # Handle both messages and channel posts
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -65,10 +77,6 @@ def check_message(update: Update, context: CallbackContext):
         return  # Skip non-text or unsupported messages
     
     message_text = message.text.lower()
-
-    # Log incoming message (for debugging)
-    print(f"[DEBUG] Received message from {user.first_name} (ID: {user_id}) in Chat ID: {chat_id}")
-    print(f"[DEBUG] Message text: '{message_text}'")
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
