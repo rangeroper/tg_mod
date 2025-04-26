@@ -108,13 +108,27 @@ def check_for_spam(message_text, user_id):
 
     return []
 
-# mute spammers
+# check for recent spam and mute spammers
 def check_recent_spam(message_text):
     now = datetime.now(timezone.utc)
     timestamp = SPAM_RECORDS.get(message_text)
     if timestamp:
         print(f"Message '{message_text}' is flagged as spam, timestamp: {timestamp}")
     return timestamp and (now - timestamp <= SPAM_RECORD_DURATION)
+
+# clean up spam records
+def cleanup_spam_records(context: CallbackContext):
+    now = datetime.now(timezone.utc)
+    expired_messages = []
+
+    for message_text, timestamp in list(SPAM_RECORDS.items()):
+        if now - timestamp > SPAM_RECORD_DURATION:
+            expired_messages.append(message_text)
+            del SPAM_RECORDS[message_text]
+            print(f"[CLEANUP] Removed expired spam record: '{message_text}'")
+
+    if not expired_messages:
+        print("[CLEANUP] No expired spam messages to remove.")
 
 
 def check_message(update: Update, context: CallbackContext):
@@ -275,6 +289,9 @@ def main():
     # Post brand assets message at 00:00 and 12:00
     job_queue.run_daily(post_brand_assets, time=time(hour=0, minute=0))
     job_queue.run_daily(post_brand_assets, time=time(hour=12, minute=0))
+
+    # check for expiring SPAM_RECORDS
+    job_queue.run_repeating(cleanup_spam_records, interval=60, first=60)
 
     # output filters
     dp.add_handler(CommandHandler("filters", list_filters))
