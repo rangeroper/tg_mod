@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
-from telegram import Update, ChatPermissions
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
+from telegram import Update, ChatPermissions, ParseMode
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
 from datetime import timedelta
+from combot.scheduled_warnings import messages
 import re
 import json
 
@@ -10,6 +11,7 @@ load_dotenv()  # Load .env vars
 
 # Get bot token from environment
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+GROUP_CHAT_ID = os.getenv('GROUP_CHAT_ID')
 
 # File path for filters
 FILTERS_FILE = "filters/filters.json"
@@ -24,6 +26,21 @@ DELETE_PHRASES = "blocklists/delete_phrases.txt"
 
 # Mute duration in seconds (3 days)
 MUTE_DURATION = 3 * 24 * 60 * 60
+
+message_index = 0
+
+def get_chat_ids(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    group_name = update.effective_chat.title
+    print(f"Chat ID for {group_name}: {chat_id}")
+    update.message.reply_text(f"Chat ID for {group_name}: {chat_id}")
+
+def post_security_message(context: CallbackContext):
+    global message_index
+    message = messages[message_index]
+    # Send to the single group chat ID (both main and staging)
+    context.bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
+    message_index = (message_index + 1) % len(messages)
 
 def load_phrases(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -53,9 +70,6 @@ def contains_multiplication_phrase(text):
     return re.search(pattern, text)
 
 def check_message(update: Update, context: CallbackContext):
-    print(f"[DEBUG] Chat ID: {update.effective_chat.id}")
-
-def check_message(update: Update, context: CallbackContext):
     message = update.message or update.channel_post  # Handle both messages and channel posts
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -65,10 +79,6 @@ def check_message(update: Update, context: CallbackContext):
         return  # Skip non-text or unsupported messages
     
     message_text = message.text.lower()
-
-    # Log incoming message (for debugging)
-    print(f"[DEBUG] Received message from {user.first_name} (ID: {user_id}) in Chat ID: {chat_id}")
-    print(f"[DEBUG] Message text: '{message_text}'")
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
@@ -160,6 +170,12 @@ def list_filters(update: Update, context: CallbackContext):
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
+
+    # Get the JobQueue from the dispatcher
+    job_queue = updater.job_queue
+
+    # Set up a job to send security messages every 5 minutes
+    job_queue.run_repeating(post_security_message, interval=5 * 60, first=0)  # Interval in seconds (5 minutes)
 
     # output filters
     dp.add_handler(CommandHandler("filters", list_filters))
