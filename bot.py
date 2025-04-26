@@ -101,14 +101,16 @@ def check_message(update: Update, context: CallbackContext):
             return
 
         for phrase in BAN_PHRASES:
-            if phrase in message_text:
+            # Use word boundaries to match exact words
+            if re.search(r'\b' + re.escape(phrase) + r'\b', message_text):
                 print(f"[BAN MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
                 context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
                 message.reply_text(f"arc angel fallen. {user.first_name} has been banned.")
                 return
 
         for phrase in MUTE_PHRASES:
-            if phrase in message_text:
+            # Use word boundaries to match exact words
+            if re.search(r'\b' + re.escape(phrase) + r'\b', message_text):
                 print(f"[MUTE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
                 until_date = message.date + timedelta(seconds=MUTE_DURATION)
                 permissions = ChatPermissions(can_send_messages=False)
@@ -117,7 +119,8 @@ def check_message(update: Update, context: CallbackContext):
                 return
 
         for phrase in DELETE_PHRASES:
-            if phrase in message_text:
+            # Use word boundaries to match exact words
+            if re.search(r'\b' + re.escape(phrase) + r'\b', message_text):
                 print(f"[DELETE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
                 context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
                 return
@@ -125,7 +128,8 @@ def check_message(update: Update, context: CallbackContext):
     # Filter Responses (apply to all)
     for trigger, filter_data in FILTERS.items():
         normalized_trigger = trigger.strip().lower()
-        if normalized_trigger in message_text:
+        # use word boundaries but allow underscores to be appended
+        if re.search(r'\b' + re.escape(normalized_trigger) + r'(_\w+)?\b', message_text):
             response_text = filter_data.get("response_text", "")
             media_file = filter_data.get("media")
             media_type = filter_data.get("type", "gif").lower()
