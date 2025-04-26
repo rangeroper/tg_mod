@@ -136,32 +136,32 @@ def check_message(update: Update, context: CallbackContext):
         context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
         return
 
-    if user_id not in admin_ids:
-        if len(message_text.strip()) < 2:
-            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+    #if user_id not in admin_ids:
+        #if len(message_text.strip()) < 2:
+            #context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            #return
+
+    for phrase in BAN_PHRASES:
+        if phrase in message_text:
+            print(f"[BAN MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
+            context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+            message.reply_text(f"arc angel fallen. {user.first_name} has been banned.")
             return
 
-        for phrase in BAN_PHRASES:
-            if phrase in message_text:
-                print(f"[BAN MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
-                context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-                message.reply_text(f"arc angel fallen. {user.first_name} has been banned.")
-                return
+    for phrase in MUTE_PHRASES:
+        if phrase in message_text:
+            print(f"[MUTE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
+            until_date = message.date + timedelta(seconds=MUTE_DURATION)
+            permissions = ChatPermissions(can_send_messages=False)
+            context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=permissions, until_date=until_date)
+            message.reply_text(f"{user.first_name} has been muted for 3 days.")
+            return
 
-        for phrase in MUTE_PHRASES:
-            if phrase in message_text:
-                print(f"[MUTE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
-                until_date = message.date + timedelta(seconds=MUTE_DURATION)
-                permissions = ChatPermissions(can_send_messages=False)
-                context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=permissions, until_date=until_date)
-                message.reply_text(f"{user.first_name} has been muted for 3 days.")
-                return
-
-        for phrase in DELETE_PHRASES:
-            if phrase in message_text:
-                print(f"[DELETE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
-                context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-                return
+    for phrase in DELETE_PHRASES:
+        if phrase in message_text:
+            print(f"[DELETE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
+            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            return
 
     # Filter Responses (apply to all)
     for trigger, filter_data in FILTERS.items():
