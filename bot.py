@@ -1,11 +1,13 @@
 import os
+import re
+import json
+import datetime
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
 from datetime import timedelta
 from combot.scheduled_warnings import messages
-import re
-import json
+from combot.brand_assets import messages as brand_assets_messages
 
 load_dotenv()  # Load .env vars
 
@@ -29,18 +31,15 @@ MUTE_DURATION = 3 * 24 * 60 * 60
 
 message_index = 0
 
-def get_chat_ids(update: Update, context: CallbackContext):
-    chat_id = update.effective_chat.id
-    group_name = update.effective_chat.title
-    print(f"Chat ID for {group_name}: {chat_id}")
-    update.message.reply_text(f"Chat ID for {group_name}: {chat_id}")
-
 def post_security_message(context: CallbackContext):
     global message_index
     message = messages[message_index]
-    # Send to the single group chat ID (both main and staging)
     context.bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
     message_index = (message_index + 1) % len(messages)
+
+def post_brand_assets(context: CallbackContext):
+    for message in brand_assets_messages:
+        context.bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
 
 def load_phrases(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -174,8 +173,12 @@ def main():
     # Get the JobQueue from the dispatcher
     job_queue = updater.job_queue
 
-    # Set up a job to send security messages every 5 minutes
-    job_queue.run_repeating(post_security_message, interval=5 * 60, first=0)  # Interval in seconds (5 minutes)
+    # Post security message every 4 hours
+    job_queue.run_repeating(post_security_message, interval=4 * 60 * 60, first=0)
+
+    # Post brand assets message at 00:00 and 12:00
+    job_queue.run_daily(post_brand_assets, time=datetime.time(hour=0, minute=0))
+    job_queue.run_daily(post_brand_assets, time=datetime.time(hour=12, minute=0))
 
     # output filters
     dp.add_handler(CommandHandler("filters", list_filters))
