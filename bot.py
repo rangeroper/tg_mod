@@ -1,11 +1,11 @@
 import os
 import re
 import json
-import datetime
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
-from datetime import timedelta
+from collections import defaultdict, deque
+from datetime import datetime, timedelta, timezone
 from combot.scheduled_warnings import messages
 from combot.brand_assets import messages as brand_assets_messages
 
@@ -26,25 +26,36 @@ BAN_PHRASES_FILE = "blocklists/ban_phrases.txt"
 MUTE_PHRASES_FILE = "blocklists/mute_phrases.txt"
 DELETE_PHRASES = "blocklists/delete_phrases.txt"
 
+# Suspicious names to auto-ban
+SUSPICIOUS_USERNAMES = [
+    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent", "support", "helpdesk"
+]
+
 # Mute duration in seconds (3 days)
 MUTE_DURATION = 3 * 24 * 60 * 60
 
+# auto spam detection variables
+SPAM_THRESHOLD = 3
+TIME_WINDOW = timedelta(seconds=15)
+SPAM_TRACKER = defaultdict(lambda: deque(maxlen=SPAM_THRESHOLD))
+SPAM_RECORDS = {} # stores flagged spam messages for 5 minutes
+SPAM_RECORD_DURATION = timedelta(minutes=5)
+
+# combot security message index
 message_index = 0
 
+# combot security message
 def post_security_message(context: CallbackContext):
     global message_index
     message = messages[message_index]
     context.bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
     message_index = (message_index + 1) % len(messages)
 
+# combot brand assets
 def post_brand_assets(context: CallbackContext):
     for message in brand_assets_messages:
         context.bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
 
-def load_phrases(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        return [line.strip().lower() for line in file.readlines()]
-    
 # Load filters as dict
 def load_filters(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -52,15 +63,14 @@ def load_filters(file_path):
 
 FILTERS = load_filters(FILTERS_FILE)
 
-# Load phrases from files
+# Load blocklist words/phrases from files
+def load_phrases(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return [line.strip().lower() for line in file.readlines()]
+
 BAN_PHRASES = load_phrases(BAN_PHRASES_FILE)
 MUTE_PHRASES = load_phrases(MUTE_PHRASES_FILE)
 DELETE_PHRASES = load_phrases(DELETE_PHRASES)
-
-# Suspicious names to auto-ban
-SUSPICIOUS_USERNAMES = [
-    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent", "support", "helpdesk"
-]
 
 def contains_multiplication_phrase(text):
     text = text.lower()
@@ -68,38 +78,92 @@ def contains_multiplication_phrase(text):
     pattern = r"(?:\d\s*)+x|x\s*(?:\d\s*)+"
     return re.search(pattern, text)
 
+# check for spam
+def check_for_spam(message_text, user_id):
+    now = datetime.now(timezone.utc)
+    # track user and timestamp of the message
+    print(f"Checking for spam: {message_text} from user: {user_id}")
+    SPAM_TRACKER[message_text].append((user_id, now))
+
+    # Filter out old messages that are outside of the time window
+    recent = [entry for entry in SPAM_TRACKER[message_text] if now - entry[1] <= TIME_WINDOW]
+    SPAM_TRACKER[message_text] = deque(recent)
+
+    print(f"Recent messages for '{message_text}': {recent}")
+
+    # If recent messages exceed the threshold, flag as spam
+    if len(recent) >= SPAM_THRESHOLD:
+        print(f"Spam detected for message: '{message_text}'")
+        # flag message as spam and store for 5 minutes in memory
+        SPAM_RECORDS[message_text] = now # only store message and timestamp
+        spammer_ids = list(set([entry[0] for entry in recent])) # Return list of user_ids to mute
+        print(f"Flagging {len(spammer_ids)} users for spam: {spammer_ids}") 
+        return spammer_ids
+    return []
+
+# mute spammers
+def check_recent_spam(message_text):
+    now = datetime.now(timezone.utc)
+    timestamp = SPAM_RECORDS.get(message_text)
+    if timestamp:
+        print(f"Message '{message_text}' is flagged as spam, timestamp: {timestamp}")
+    return timestamp and (now - timestamp <= SPAM_RECORD_DURATION)
+
+
 def check_message(update: Update, context: CallbackContext):
     message = update.message or update.channel_post  # Handle both messages and channel posts
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     user = update.effective_user
-
-    if not message or not message.text:
-        return  # Skip non-text or unsupported messages
-    
     message_text = message.text.lower()
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
     admin_ids = [admin.user.id for admin in chat_admins]
 
-    # Auto-ban based on suspicious name or username
-    name_username = f"{user.full_name} {user.username or ''}".lower()
+    if not message or not message.text:
+        return  # Skip non-text or unsupported messages
     
-    if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
-        context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
-        return
-
-    # Check for multiplication spam
-    if contains_multiplication_phrase(message_text):
-        context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-        return
-    
+    # Ignore messages from admins
     if user_id not in admin_ids:
+
+        # check if message is too short
         if len(message_text.strip()) < 2:
             context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
 
+        # Auto-ban based on suspicious name or username
+        name_username = f"{user.full_name} {user.username or ''}".lower()
+        if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
+            context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+            return
+
+        # Check for multiplication spam
+        if contains_multiplication_phrase(message_text):
+            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            return
+        
+        # auto spam detection
+        spammer_ids = check_for_spam(message_text, user_id)
+
+        if check_recent_spam(message_text):
+            if user_id not in spammer_ids:
+                spammer_ids.append(user_id)
+
+        if spammer_ids:
+            print(f"Muting spammers for message: '{message_text}'")
+            for spammer_id in set(spammer_ids):
+                try:
+                    until_date = message.date + timedelta(seconds=MUTE_DURATION)
+                    permissions = ChatPermissions(can_send_messages=False)
+                    context.bot.restrict_chat_member(chat_id=chat_id, user_id=spammer_id, permissions=permissions, until_date=until_date)
+                    context.bot.send_message(chat_id=chat_id, text=f"User {spammer_id} has been muted for spamming identical messages.")
+                    print(f"Muted user {spammer_id} for spam message.")
+                except Exception as e:
+                    print(f"Failed to mute spammer {spammer_id}: {e}")
+            return                                       
+    
+        # Check for banned phrases
         for phrase in BAN_PHRASES:
             # Use word boundaries to match exact words
             if re.search(r'\b' + re.escape(phrase) + r'\b', message_text):
@@ -108,6 +172,7 @@ def check_message(update: Update, context: CallbackContext):
                 message.reply_text(f"arc angel fallen. {user.first_name} has been banned.")
                 return
 
+        # Check for muted phrases
         for phrase in MUTE_PHRASES:
             # Use word boundaries to match exact words
             if re.search(r'\b' + re.escape(phrase) + r'\b', message_text):
@@ -118,6 +183,7 @@ def check_message(update: Update, context: CallbackContext):
                 message.reply_text(f"{user.first_name} has been muted for 3 days.")
                 return
 
+        # Check for deleted phrases
         for phrase in DELETE_PHRASES:
             # Use word boundaries to match exact words
             if re.search(r'\b' + re.escape(phrase) + r'\b', message_text):
