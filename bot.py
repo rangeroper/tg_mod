@@ -129,7 +129,7 @@ def check_message(update: Update, context: CallbackContext):
     for trigger, filter_data in FILTERS.items():
         normalized_trigger = trigger.strip().lower()
         # use word boundaries but allow underscores to be appended
-        pattern = rf'(?:\b|(?<=/)){re.escape(normalized_trigger)}(_\w+)?\b'
+        pattern = rf'(?<!\w)/?{re.escape(normalized_trigger)}(_\w+)?(?!\w)'
         
         if re.search(pattern, message_text):
             response_text = filter_data.get("response_text", "")
