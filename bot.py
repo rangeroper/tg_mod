@@ -129,7 +129,9 @@ def check_message(update: Update, context: CallbackContext):
     for trigger, filter_data in FILTERS.items():
         normalized_trigger = trigger.strip().lower()
         # use word boundaries but allow underscores to be appended
-        if re.search(r'\b' + re.escape(normalized_trigger) + r'(_\w+)?\b', message_text):
+        pattern = rf'(?:\b|(?<=/)){re.escape(normalized_trigger)}(_\w+)?\b'
+        
+        if re.search(pattern, message_text):
             response_text = filter_data.get("response_text", "")
             media_file = filter_data.get("media")
             media_type = filter_data.get("type", "gif").lower()
