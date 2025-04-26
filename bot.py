@@ -90,11 +90,7 @@ def check_message(update: Update, context: CallbackContext):
 
     # Check for multiplication spam
     if contains_multiplication_phrase(message_text):
-        print(f"[MUTE MATCH] Phrase: '{phrase}' matched in message: '{message_text}'")
-        until_date = message.date + timedelta(seconds=MUTE_DURATION)
-        permissions = ChatPermissions(can_send_messages=False)
-        context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=permissions, until_date=until_date)
-        message.reply_text(f"{user.first_name} has been muted for 3 days.")
+        context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
         return
     
     if contains_inappropriate_language_muted(message_text):
