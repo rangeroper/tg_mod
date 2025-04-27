@@ -308,5 +308,10 @@
     "response_text": "Admins in arc complex:\n- @arc_complex, owner\n- @Solamigoodman01 (Arc Alchemist)\n- @kezofutura (Arc Alchemist)\n- @joshmo_dev (Arc Alchemist)\n-  (Arc Alchemist)\n- @oxjoblo (Arc Whisperer)\n- @CryptoHypeMan (Arc Alchemist)\n- @diamondhandzs (Arc Alchemist)\n- @rin_0xtohsaka\n- @Tachikoma000 (Arc High Priest)\n- @mateobelanger\n- @philostopher (Arc Wizard)\n- @mochan0x (Arc Wizard)\n\nNote: These are up-to-date values.",
     "media": null,
     "type": "text"
+  },
+  "/blog": {
+    "response_text": "https://www.arc.fun/blog",
+    "media": null,
+    "type": "text"
   }
 }
