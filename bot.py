@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import pytz
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
@@ -49,13 +50,33 @@ message_index = 0
 def post_security_message(context: CallbackContext):
     global message_index
     message = messages[message_index]
-    context.bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
+    sent_message = context.bot.send_message(
+        chat_id=GROUP_CHAT_ID, 
+        text=message, 
+        parse_mode=ParseMode.HTML
+    )
+    # Pin the sent message
+    context.bot.pin_chat_message(
+        chat_id=GROUP_CHAT_ID, 
+        message_id=sent_message.message_id, 
+        disable_notification=True  # No loud ping
+    )
     message_index = (message_index + 1) % len(messages)
 
 # combot brand assets
 def post_brand_assets(context: CallbackContext):
     for message in brand_assets_messages:
-        context.bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
+        sent_message = context.bot.send_message(
+            chat_id=GROUP_CHAT_ID, 
+            text=message, 
+            parse_mode=ParseMode.HTML
+        )
+        # Pin the sent message
+        context.bot.pin_chat_message(
+            chat_id=GROUP_CHAT_ID, 
+            message_id=sent_message.message_id, 
+            disable_notification=True
+        )
 
 # Load filters as dict
 def load_filters(file_path):
@@ -181,6 +202,7 @@ def check_message(update: Update, context: CallbackContext):
                 print(f"[SPAM CHECK SKIPPED] Message '{message_text}' matched WHITELIST.")
                 should_skip_spam_check = True
 
+        # 3. autospam - check for spam
         if not should_skip_spam_check:
             # Run spam detection only if no FILTER trigger matched
             spammer_ids = check_for_spam(message_text, user_id)
@@ -286,9 +308,9 @@ def main():
     # Post security message every 4 hours
     job_queue.run_repeating(post_security_message, interval=4 * 60 * 60, first=0)
 
-    # Post brand assets message at 00:00 and 12:00
-    job_queue.run_daily(post_brand_assets, time=time(hour=0, minute=0))
-    job_queue.run_daily(post_brand_assets, time=time(hour=12, minute=0))
+    # Post brand assets message at 00:00 and 12:00 (5:00 and 17:00 UTC)
+    job_queue.run_daily(post_brand_assets, time=time(hour=5, minute=0))
+    job_queue.run_daily(post_brand_assets, time=time(hour=17, minute=0))
 
     # check for expiring SPAM_RECORDS
     job_queue.run_repeating(cleanup_spam_records, interval=60, first=60)
