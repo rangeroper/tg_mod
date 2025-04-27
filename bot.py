@@ -1,7 +1,6 @@
 import os
 import re
 import json
-import pytz
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
@@ -30,7 +29,7 @@ WHITELIST_PHRASES = "whitelists/whitelist_phrases.txt"
 
 # Suspicious names to auto-ban
 SUSPICIOUS_USERNAMES = [
-    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent", "support", "helpdesk"
+    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent" "arch_agent", "arch agent", "support", "helpdesk", "administrator", "arc admin", "arc_admin"
 ]
 
 # Mute duration in seconds (3 days)
