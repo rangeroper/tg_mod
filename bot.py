@@ -207,15 +207,19 @@ def check_message(update: Update, context: CallbackContext):
         if user_id in admin_ids:
             # Get the message after the /say command
             say_message = " ".join(context.args)
+
+            print(f"Context Args: {context.args}")
             
             # Ensure the message is not empty
-            if say_message:
+            if say_message.strip():
                 # Send the message as the bot
                 context.bot.send_message(
                     chat_id=chat_id,
                     text=say_message,
                     parse_mode=ParseMode.HTML  # If you want to support HTML formatting
                 )
+            else:
+                print("Empty say_message, skipping send.") 
             return  # After processing /say, exit the function
     
     # Ignore messages from admins
