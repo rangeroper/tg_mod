@@ -185,11 +185,11 @@ def cleanup_spam_records(context: CallbackContext):
     if not expired_messages:
         print("[CLEANUP] No expired spam messages to remove.")
 
-def run_metrics_bot():
+def run_metrics_bot(context):
     """Function to run the metrics_bot.py script."""
     try:
         # Run the metrics_bot.py script using subprocess
-        subprocess.run([sys.executable, "metrics_bot.py"], check=True)
+        subprocess.Popen(["python3", "metrics_bot.py"])
         print("Metrics bot ran successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error running metrics_bot.py: {e}")
