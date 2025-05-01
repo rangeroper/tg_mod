@@ -139,34 +139,24 @@ def say_command(update, context):
     user_id = update.effective_user.id
 
     # Get the latest admin IDs
-    print(f"Fetching admin IDs for chat {chat_id}...")
     admin_ids = get_admin_ids(context, chat_id)
-    print(f"Admin IDs for chat {chat_id}: {admin_ids}")
 
     # Ensure the user is an admin (using admin_ids already fetched)
     if user_id not in admin_ids:
-        print(f"User {user_id} is not an admin. Command aborted.")
         return
 
     # Get the message from the user
     message = " ".join(context.args)
-    print(f"Message received from user {user_id}: {message}")
 
     if not message:
-        print("No message provided, aborting command.")
         return
 
     # Send the message as the bot
-    try:
-        print(f"Sending message as bot to chat {chat_id}: {message}")
-        context.bot.send_message(
-            chat_id=chat_id,
-            text=message,
-            parse_mode=ParseMode.HTML  # If you want to support HTML formatting
-        )
-        print("Message successfully sent.")
-    except Exception as e:
-        print(f"Failed to send message: {e}")
+    context.bot.send_message(
+        chat_id=chat_id,
+        text=message,
+        parse_mode=ParseMode.HTML  # If you want to support HTML formatting
+    )
 
 # check for spam
 def check_for_spam(message_text, user_id):
@@ -230,7 +220,7 @@ def check_message(update: Update, context: CallbackContext):
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
-    admin_ids = get_admin_ids(context, chat_id)
+    admin_ids = [admin.user.id for admin in chat_admins]
 
     if not message or not message.text:
         return  # Skip non-text or unsupported messages
