@@ -205,21 +205,18 @@ def check_message(update: Update, context: CallbackContext):
     if message_text.startswith('/say '):
         # Ensure the user is an admin (using admin_ids already fetched)
         if user_id in admin_ids:
-            print(f"admin {user_id} using say command")
             # Get the message after the /say command
             say_message = message_text[len('/say '):].strip()
-            
-            print(f"Extracted say_message: '{say_message}'")
-            
+                        
             # Ensure the message is not empty
             if say_message:
+                context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
                 # Send the message as the bot
                 context.bot.send_message(
                     chat_id=chat_id,
                     text=say_message,
                     parse_mode=ParseMode.HTML  # If you want to support HTML formatting
                 )
-                context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             else:
                 print("Empty say_message, skipping send.") 
             return  # After processing /say, exit the function
