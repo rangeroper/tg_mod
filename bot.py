@@ -48,34 +48,57 @@ message_index = 0
 # combot security message
 def post_security_message(context: CallbackContext):
     global message_index
+
+    try:
+        chat = context.bot.get_chat(GROUP_CHAT_ID)
+        pinned = chat.pinned_message
+        if pinned:
+            context.bot.unpin_chat_message(chat_id=GROUP_CHAT_ID, message_id=pinned.message_id)
+    except Exception as e:
+        print(f"[Security] could not unpin/delete pinned message: {e}")
+
+    # send new message
     message = messages[message_index]
     sent_message = context.bot.send_message(
         chat_id=GROUP_CHAT_ID, 
         text=message, 
         parse_mode=ParseMode.HTML
     )
-    # Pin the sent message
+    # pin the sent message
     context.bot.pin_chat_message(
         chat_id=GROUP_CHAT_ID, 
         message_id=sent_message.message_id, 
         disable_notification=True  # No loud ping
     )
+
+    # increment message index for next iteration
     message_index = (message_index + 1) % len(messages)
 
 # combot brand assets
 def post_brand_assets(context: CallbackContext):
-    for message in brand_assets_messages:
-        sent_message = context.bot.send_message(
-            chat_id=GROUP_CHAT_ID, 
-            text=message, 
-            parse_mode=ParseMode.HTML
-        )
-        # Pin the sent message
-        context.bot.pin_chat_message(
-            chat_id=GROUP_CHAT_ID, 
-            message_id=sent_message.message_id, 
-            disable_notification=True
-        )
+    # Try to get and delete the current pinned message
+    try:
+        chat = context.bot.get_chat(GROUP_CHAT_ID)
+        pinned = chat.pinned_message
+        if pinned:
+            context.bot.unpin_chat_message(chat_id=GROUP_CHAT_ID)
+            context.bot.delete_message(chat_id=GROUP_CHAT_ID, message_id=pinned.message_id)
+    except Exception as e:
+        print(f"[Brand Assets] Could not unpin/delete pinned message: {e}")
+
+    # send new message
+    message = brand_assets_messages[0]  # Only one message assumed
+    sent_message = context.bot.send_message(
+        chat_id=GROUP_CHAT_ID,
+        text=message,
+        parse_mode=ParseMode.HTML
+    )
+    # pin the sent message
+    context.bot.pin_chat_message(
+        chat_id=GROUP_CHAT_ID, 
+        message_id=sent_message.message_id, 
+        disable_notification=True
+    )
 
 # Load filters as dict
 def load_filters(file_path):
@@ -304,12 +327,12 @@ def main():
     # Get the JobQueue from the dispatcher
     job_queue = updater.job_queue
 
-    # Post security message every 4 hours
-    job_queue.run_repeating(post_security_message, interval=4 * 60 * 60, first=0)
+    # Post security messages at 8:00 AM and 4:00 PM
+    job_queue.run_daily(post_security_message, time=time(hour=8, minute=0))
+    job_queue.run_daily(post_security_message, time=time(hour=16, minute=0))
 
     # Post brand assets message at 00:00 and 12:00 (5:00 and 17:00 UTC)
-    job_queue.run_daily(post_brand_assets, time=time(hour=5, minute=0))
-    job_queue.run_daily(post_brand_assets, time=time(hour=17, minute=0))
+    job_queue.run_daily(post_brand_assets, time=time(hour=0, minute=0))
 
     # check for expiring SPAM_RECORDS
     job_queue.run_repeating(cleanup_spam_records, interval=60, first=60)
