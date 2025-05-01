@@ -219,6 +219,7 @@ def check_message(update: Update, context: CallbackContext):
                     text=say_message,
                     parse_mode=ParseMode.HTML  # If you want to support HTML formatting
                 )
+                context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             else:
                 print("Empty say_message, skipping send.") 
             return  # After processing /say, exit the function
