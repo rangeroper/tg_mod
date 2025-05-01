@@ -3,10 +3,8 @@ FROM python:3.10-slim
 # Install system dependencies for Playwright
 RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
-    libgobject-2.0-0 \
     libnss3 \
     libnss3-dev \
-    libsmime3 \
     libnspr4 \
     libdbus-1-3 \
     libatk1.0-0 \
@@ -27,8 +25,8 @@ RUN apt-get update && apt-get install -y \
     libxcb1 \
     libatspi2.0-0 \
     wget \
-    curl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
