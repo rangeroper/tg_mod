@@ -123,6 +123,34 @@ def contains_multiplication_phrase(text):
     pattern = r"(?:\d\s*)+x|x\s*(?:\d\s*)+"
     return re.search(pattern, text)
 
+def contains_give_sol_phrase(text):
+    text = text.lower()
+    # Match 'give' followed by a number and then 'sol' or 'solana'
+    pattern = r"give\s*(\d+)\s*(sol|solana)"
+    return re.search(pattern, text)
+
+def say_command(update, context, admin_ids):
+    # Get the message from the user
+    message = " ".join(context.args)
+
+    # Ensure the user is an admin (using admin_ids already fetched in check_message)
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    # Only admins can use the /say command, non-admins are silently ignored
+    if user_id not in admin_ids:
+        return
+
+    if not message:
+        return
+
+    # Send the message as the bot
+    context.bot.send_message(
+        chat_id=chat_id,
+        text=message,
+        parse_mode=ParseMode.HTML  # If you want to support HTML formatting
+    )
+
 # check for spam
 def check_for_spam(message_text, user_id):
     now = datetime.now(timezone.utc)
@@ -206,6 +234,11 @@ def check_message(update: Update, context: CallbackContext):
 
         # Check for multiplication spam
         if contains_multiplication_phrase(message_text):
+            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            return
+        
+        # Check for "give x sol" or "give x solana" spam
+        if contains_give_sol_phrase(message_text):
             context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
         
