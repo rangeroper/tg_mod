@@ -5,7 +5,7 @@
       "buildCommand": "pip install -r requirements.txt" 
     },
     "deploy": {
-      "startCommand": "/bin/sh -c 'pip install -r requirements.txt && python bot.py'"
+      "startCommand": "/bin/sh -c 'pip install -r requirements.txt && playwright install && python bot.py'"
     }
   }
   

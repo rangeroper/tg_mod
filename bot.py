@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import subprocess
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
@@ -184,6 +185,14 @@ def cleanup_spam_records(context: CallbackContext):
     if not expired_messages:
         print("[CLEANUP] No expired spam messages to remove.")
 
+def run_metrics_bot():
+    """Function to run the metrics_bot.py script."""
+    try:
+        # Run the metrics_bot.py script using subprocess
+        subprocess.run([sys.executable, "metrics_bot.py"], check=True)
+        print("Metrics bot ran successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error running metrics_bot.py: {e}")
 
 def check_message(update: Update, context: CallbackContext):
     should_skip_spam_check = False
@@ -372,6 +381,9 @@ def main():
 
     # check for expiring SPAM_RECORDS
     job_queue.run_repeating(cleanup_spam_records, interval=60, first=60)
+
+    # Run metrics_bot.py every 5 minutes
+    job_queue.run_repeating(run_metrics_bot, interval=300, first=60)
 
     # output filters
     dp.add_handler(CommandHandler("filters", list_filters))
