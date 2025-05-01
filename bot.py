@@ -376,8 +376,6 @@ def main():
     # Add text and command message handler
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
 
-    dp.add_handler(CommandHandler("say", say_command, pass_args=True))
-
     updater.start_polling()
     updater.idle()
 
