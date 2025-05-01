@@ -134,30 +134,6 @@ def contains_give_sol_phrase(text):
     pattern = r"give\s*(\d+)\s*(sol|solana)"
     return re.search(pattern, text)
 
-def say_command(update, context):
-    chat_id = update.effective_chat.id
-    user_id = update.effective_user.id
-
-    # Get the latest admin IDs
-    admin_ids = get_admin_ids(context, chat_id)
-
-    # Ensure the user is an admin (using admin_ids already fetched)
-    if user_id not in admin_ids:
-        return
-
-    # Get the message from the user
-    message = " ".join(context.args)
-
-    if not message:
-        return
-
-    # Send the message as the bot
-    context.bot.send_message(
-        chat_id=chat_id,
-        text=message,
-        parse_mode=ParseMode.HTML  # If you want to support HTML formatting
-    )
-
 # check for spam
 def check_for_spam(message_text, user_id):
     now = datetime.now(timezone.utc)
@@ -224,6 +200,23 @@ def check_message(update: Update, context: CallbackContext):
 
     if not message or not message.text:
         return  # Skip non-text or unsupported messages
+    
+    # If the message starts with /say, the bot will send a message on behalf of the admin
+    if message_text.startswith('/say '):
+        # Ensure the user is an admin (using admin_ids already fetched)
+        if user_id in admin_ids:
+            # Get the message after the /say command
+            say_message = " ".join(context.args)
+            
+            # Ensure the message is not empty
+            if say_message:
+                # Send the message as the bot
+                context.bot.send_message(
+                    chat_id=chat_id,
+                    text=say_message,
+                    parse_mode=ParseMode.HTML  # If you want to support HTML formatting
+                )
+            return  # After processing /say, exit the function
     
     # Ignore messages from admins
     if user_id not in admin_ids:
