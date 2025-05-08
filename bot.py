@@ -43,9 +43,6 @@ SPAM_TRACKER = defaultdict(lambda: deque(maxlen=SPAM_THRESHOLD))
 SPAM_RECORDS = {} # stores flagged spam messages for 5 minutes
 SPAM_RECORD_DURATION = timedelta(minutes=5)
 
-# combot security message index
-message_index = 0
-
 def get_admin_ids(context, chat_id):
     # Fetch chat admins dynamically
     chat_admins = context.bot.get_chat_administrators(chat_id)
@@ -67,15 +64,13 @@ def post_security_message(context: CallbackContext, index: int):
                 print(f"[Security] Failed to delete message: {e}")
     except Exception as e:
         print(f"[Security] Failed to retrieve chat or pinned message: {e}")
-
-    message = messages[index]
-    sent_message = context.bot.send_message(
-        chat_id=GROUP_CHAT_ID, 
-        text=message, 
-        parse_mode=ParseMode.HTML
-    )
-
     try:
+        message = messages[index]
+        sent_message = context.bot.send_message(
+            chat_id=GROUP_CHAT_ID, 
+            text=message, 
+            parse_mode=ParseMode.HTML
+        )
         context.bot.pin_chat_message(
             chat_id=GROUP_CHAT_ID, 
             message_id=sent_message.message_id, 
@@ -100,7 +95,6 @@ def post_brand_assets(context: CallbackContext, index: int = 0):
                 print(f"[Brand Assets] Failed to delete message: {e}")
     except Exception as e:
         print(f"[Brand Assets] Failed to retrieve chat or pinned message: {e}")
-
     try:
         message = brand_assets_messages[index]
         sent_message = context.bot.send_message(
