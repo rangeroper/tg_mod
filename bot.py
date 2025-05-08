@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import subprocess
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
@@ -183,7 +184,6 @@ def cleanup_spam_records(context: CallbackContext):
 
     if not expired_messages:
         print("[CLEANUP] No expired spam messages to remove.")
-
 
 def check_message(update: Update, context: CallbackContext):
     should_skip_spam_check = False
