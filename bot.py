@@ -4,7 +4,7 @@ import json
 import subprocess
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, JobQueue
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
 from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone, time
 from combot.scheduled_warnings import messages
@@ -25,12 +25,12 @@ MEDIA_FOLDER = "media"
 # File paths for phrases
 BAN_PHRASES_FILE = "blocklists/ban_phrases.txt"
 MUTE_PHRASES_FILE = "blocklists/mute_phrases.txt"
-DELETE_PHRASES = "blocklists/delete_phrases.txt"
-WHITELIST_PHRASES = "whitelists/whitelist_phrases.txt"
+DELETE_PHRASES_FILE = "blocklists/delete_phrases.txt"
+WHITELIST_PHRASES_FILE = "whitelists/whitelist_phrases.txt"
 
 # Suspicious names to auto-ban
 SUSPICIOUS_USERNAMES = [
-    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent" "arch_agent", "arch agent", "support", "helpdesk", "administrator", "arc admin", "arc_admin"
+    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent", "arch_agent", "arch agent", "support", "helpdesk", "administrator", "arc admin", "arc_admin"
 ]
 
 # Mute duration in seconds (3 days)
@@ -52,59 +52,69 @@ def get_admin_ids(context, chat_id):
     return [admin.user.id for admin in chat_admins]
 
 # combot security message
-def post_security_message(context: CallbackContext):
-    global message_index
-
+def post_security_message(context: CallbackContext, index: int):
     try:
         chat = context.bot.get_chat(GROUP_CHAT_ID)
         pinned = chat.pinned_message
         if pinned:
-            context.bot.unpin_chat_message(chat_id=GROUP_CHAT_ID, message_id=pinned.message_id)
+            try:
+                context.bot.unpin_chat_message(chat_id=GROUP_CHAT_ID, message_id=pinned.message_id)
+            except Exception as e:
+                print(f"[Security] Failed to unpin message: {e}")
+            try:
+                context.bot.delete_message(chat_id=GROUP_CHAT_ID, message_id=pinned.message_id)
+            except Exception as e:
+                print(f"[Security] Failed to delete message: {e}")
     except Exception as e:
-        print(f"[Security] could not unpin/delete pinned message: {e}")
+        print(f"[Security] Failed to retrieve chat or pinned message: {e}")
 
-    # send new message
-    message = messages[message_index]
+    message = messages[index]
     sent_message = context.bot.send_message(
         chat_id=GROUP_CHAT_ID, 
         text=message, 
         parse_mode=ParseMode.HTML
     )
-    # pin the sent message
-    context.bot.pin_chat_message(
-        chat_id=GROUP_CHAT_ID, 
-        message_id=sent_message.message_id, 
-        disable_notification=True  # No loud ping
-    )
 
-    # increment message index for next iteration
-    message_index = (message_index + 1) % len(messages)
+    try:
+        context.bot.pin_chat_message(
+            chat_id=GROUP_CHAT_ID, 
+            message_id=sent_message.message_id, 
+            disable_notification=True
+        )
+    except Exception as e:
+        print(f"[Security] Failed to pin message: {e}")
 
 # combot brand assets
-def post_brand_assets(context: CallbackContext):
-    # Try to get and delete the current pinned message
+def post_brand_assets(context: CallbackContext, index: int = 0):
     try:
         chat = context.bot.get_chat(GROUP_CHAT_ID)
         pinned = chat.pinned_message
         if pinned:
-            context.bot.unpin_chat_message(chat_id=GROUP_CHAT_ID)
-            context.bot.delete_message(chat_id=GROUP_CHAT_ID, message_id=pinned.message_id)
+            try:
+                context.bot.unpin_chat_message(chat_id=GROUP_CHAT_ID, message_id=pinned.message_id)
+            except Exception as e:
+                print(f"[Brand Assets] Failed to unpin message: {e}")
+            try:
+                context.bot.delete_message(chat_id=GROUP_CHAT_ID, message_id=pinned.message_id)
+            except Exception as e:
+                print(f"[Brand Assets] Failed to delete message: {e}")
     except Exception as e:
-        print(f"[Brand Assets] Could not unpin/delete pinned message: {e}")
+        print(f"[Brand Assets] Failed to retrieve chat or pinned message: {e}")
 
-    # send new message
-    message = brand_assets_messages[0]  # Only one message assumed
-    sent_message = context.bot.send_message(
-        chat_id=GROUP_CHAT_ID,
-        text=message,
-        parse_mode=ParseMode.HTML
-    )
-    # pin the sent message
-    context.bot.pin_chat_message(
-        chat_id=GROUP_CHAT_ID, 
-        message_id=sent_message.message_id, 
-        disable_notification=True
-    )
+    try:
+        message = brand_assets_messages[index]
+        sent_message = context.bot.send_message(
+            chat_id=GROUP_CHAT_ID,
+            text=message,
+            parse_mode=ParseMode.HTML
+        )
+        context.bot.pin_chat_message(
+            chat_id=GROUP_CHAT_ID,
+            message_id=sent_message.message_id,
+            disable_notification=True
+        )
+    except Exception as e:
+        print(f"[Brand Assets] Failed to send or pin message: {e}")
 
 # Load filters as dict
 def load_filters(file_path):
@@ -120,8 +130,8 @@ def load_phrases(file_path):
 
 BAN_PHRASES = load_phrases(BAN_PHRASES_FILE)
 MUTE_PHRASES = load_phrases(MUTE_PHRASES_FILE)
-DELETE_PHRASES = load_phrases(DELETE_PHRASES)
-WHITELIST_PHRASES = load_phrases(WHITELIST_PHRASES)
+DELETE_PHRASES = load_phrases(DELETE_PHRASES_FILE)
+WHITELIST_PHRASES = load_phrases(WHITELIST_PHRASES_FILE)
 
 def contains_multiplication_phrase(text):
     text = text.lower()
@@ -189,17 +199,19 @@ def check_message(update: Update, context: CallbackContext):
     should_skip_spam_check = False
     
     message = update.message or update.channel_post  # Handle both messages and channel posts
+
+    if not message or not message.text:
+        return  # Skip non-text or unsupported messages
+    
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     user = update.effective_user
+    
     message_text = message.text.lower()
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
     admin_ids = [admin.user.id for admin in chat_admins]
-
-    if not message or not message.text:
-        return  # Skip non-text or unsupported messages
     
     # If the message starts with /say, the bot will send a message on behalf of the admin
     if message_text.startswith('/say '):
@@ -363,11 +375,10 @@ def main():
     # Get the JobQueue from the dispatcher
     job_queue = updater.job_queue
 
-    # Post security messages at 8:00 AM and 4:00 PM
-    job_queue.run_daily(post_security_message, time=time(hour=8, minute=0))
-    job_queue.run_daily(post_security_message, time=time(hour=16, minute=0))
+    # combot alerts
 
-    # Post brand assets message at 00:00 and 12:00 (5:00 and 17:00 UTC)
+    job_queue.run_daily(lambda context: post_security_message(context, 0), time=time(hour=8, minute=0))  
+    job_queue.run_daily(lambda context: post_security_message(context, 1), time=time(hour=16, minute=0))
     job_queue.run_daily(post_brand_assets, time=time(hour=0, minute=0))
 
     # check for expiring SPAM_RECORDS
