@@ -4,7 +4,7 @@ import json
 import subprocess
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, CallbackQueryHandler
 from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone, time
 from combot.scheduled_warnings import messages
@@ -205,19 +205,21 @@ def check_message(update: Update, context: CallbackContext):
     
     message = update.message or update.channel_post  # Handle both messages and channel posts
 
-    # Print specific details to inspect the forwarded message and inline buttons
-    print(f"Message Type: {type(message).__name__}")
-    print(f"Message Text: {message.text if message.text else 'No text content'}")
-    print(f"Forwarded: {message.forward_from or 'No forward'}")
-    print(f"Inline Buttons: {message.reply_markup.inline_keyboard if message.reply_markup else 'No Inline Buttons'}")
-
-    # Block messages containing inline buttons from non-admins
-    if message.reply_markup and message.reply_markup.inline_keyboard:
-        user_id = message.from_user.id if message.from_user else 'Unknown'
-        chat_id = message.chat.id
-        print(f"[INLINE BUTTON DETECTED] Message from user {user_id} has inline buttons. Deleting.")
-        context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+    if message.photo:
+        print("==== Image Detected ====")
+        print(f"User: {user.username} (ID: {user.id})")
+        print(f"Message ID: {message.message_id}")
+        print(f"Caption: {message.caption}")
+        print(f"Photo sizes: {message.photo}") 
         return
+
+    if message.video:
+        print("==== Video Detected ====")
+        print(f"User: {user.username} (ID: {user.id})")
+        print(f"Message ID: {message.message_id}")
+        print(f"Caption: {message.caption}")
+        print(f"Video sizes: {message.video}")
+        return 
 
     if not message or not message.text:
         return  # Skip non-text or unsupported messages
