@@ -205,6 +205,7 @@ def check_message(update: Update, context: CallbackContext):
     
     message = update.message or update.channel_post  # Handle both messages and channel posts
     if not message:
+        print("==== No message or channel post detected ====")
         return
     
     chat_id = update.effective_chat.id
