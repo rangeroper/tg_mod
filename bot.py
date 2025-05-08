@@ -189,6 +189,17 @@ def cleanup_spam_records(context: CallbackContext):
     if not expired_messages:
         print("[CLEANUP] No expired spam messages to remove.")
 
+def contains_non_x_links(text: str) -> bool:
+    # Matches all URLs
+    url_pattern = r'(https?://[^\s]+)'
+    urls = re.findall(url_pattern, text)
+
+    for url in urls:
+        # Allow only Twitter/X links
+        if not re.search(r'https?://(www\.)?(x\.com|twitter\.com)/[^\s]+', url):
+            return True  # Found a non-X link
+    return False
+
 def check_message(update: Update, context: CallbackContext):
     should_skip_spam_check = False
     
@@ -239,6 +250,12 @@ def check_message(update: Update, context: CallbackContext):
         name_username = f"{user.full_name} {user.username or ''}".lower()
         if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
             context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+            return
+        
+        # Delete message if it contains non-X links
+        if contains_non_x_links(message.text):
+            print(f"[LINK FILTER] Message from user {user_id} contains non-X links. Deleting.")
+            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
 
         # Check for multiplication spam
