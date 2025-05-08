@@ -205,8 +205,16 @@ def check_message(update: Update, context: CallbackContext):
     
     message = update.message or update.channel_post  # Handle both messages and channel posts
 
+    # Print specific details to inspect the forwarded message and inline buttons
+    print(f"Message Type: {type(message).__name__}")
+    print(f"Message Text: {message.text if message.text else 'No text content'}")
+    print(f"Forwarded: {message.forward_from or 'No forward'}")
+    print(f"Inline Buttons: {message.reply_markup.inline_keyboard if message.reply_markup else 'No Inline Buttons'}")
+
     # Block messages containing inline buttons from non-admins
     if message.reply_markup and message.reply_markup.inline_keyboard:
+        user_id = message.from_user.id if message.from_user else 'Unknown'
+        chat_id = message.chat.id
         print(f"[INLINE BUTTON DETECTED] Message from user {user_id} has inline buttons. Deleting.")
         context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
         return
