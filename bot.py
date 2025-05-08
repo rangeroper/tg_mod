@@ -205,6 +205,12 @@ def check_message(update: Update, context: CallbackContext):
     
     message = update.message or update.channel_post  # Handle both messages and channel posts
 
+    # Block messages containing inline buttons from non-admins
+    if message.reply_markup and message.reply_markup.inline_keyboard:
+        print(f"[INLINE BUTTON DETECTED] Message from user {user_id} has inline buttons. Deleting.")
+        context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+        return
+
     if not message or not message.text:
         return  # Skip non-text or unsupported messages
     
@@ -271,12 +277,6 @@ def check_message(update: Update, context: CallbackContext):
         # Block forwarded messages from non-admins
         if message.forward_date or message.forward_from or message.forward_from_chat:
             print(f"[FORWARD DETECTED] User {user_id} forwarded a message.")
-            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-            return
-        
-        # Block messages containing inline buttons from non-admins
-        if message.reply_markup and getattr(message.reply_markup, 'inline_keyboard', None):
-            print(f"[INLINE BUTTON DETECTED] Message from user {user_id} has inline buttons. Deleting.")
             context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
         
