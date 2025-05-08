@@ -268,6 +268,12 @@ def check_message(update: Update, context: CallbackContext):
             context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
         
+        # Block forwarded messages from non-admins
+        if message.forward_date or message.forward_from or message.forward_from_chat:
+            print(f"[FORWARD DETECTED] User {user_id} forwarded a message.")
+            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            return
+        
         # 1. autospam - check if its a command or matches a filter
         for trigger in FILTERS.keys():
             normalized_trigger = trigger.strip().lower()
