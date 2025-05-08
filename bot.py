@@ -274,6 +274,12 @@ def check_message(update: Update, context: CallbackContext):
             context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
         
+        # Block messages containing inline buttons from non-admins
+        if message.reply_markup and getattr(message.reply_markup, 'inline_keyboard', None):
+            print(f"[INLINE BUTTON DETECTED] Message from user {user_id} has inline buttons. Deleting.")
+            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            return
+        
         # 1. autospam - check if its a command or matches a filter
         for trigger in FILTERS.keys():
             normalized_trigger = trigger.strip().lower()
