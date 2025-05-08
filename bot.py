@@ -208,59 +208,10 @@ def check_message(update: Update, context: CallbackContext):
         print("==== No message or channel post detected ====")
         return
     
+    message_text = message.text.lower()
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     user = update.effective_user
-
-    print(f"==== New Message Detected ====")
-    print(f"User: {user.username} (ID: {user.id})")
-    print(f"Message ID: {message.message_id}")
-    
-    # Check for different types of content
-    
-    if message.photo:
-        print("==== Photo Detected ====")
-        print(f"Caption: {message.caption}")
-        print(f"Photo sizes: {message.photo}") 
-
-    elif message.video:
-        print("==== Video Detected ====")
-        print(f"Caption: {message.caption}")
-        print(f"Video details: {message.video}")
-
-    elif message.document:
-        print("==== Document Detected ====")
-        print(f"Document details: {message.document}")
-
-    elif message.sticker:
-        print("==== Sticker Detected ====")
-        print(f"Sticker details: {message.sticker}")
-
-    elif message.voice:
-        print("==== Voice Message Detected ====")
-        print(f"Voice details: {message.voice}")
-
-    elif message.audio:
-        print("==== Audio Message Detected ====")
-        print(f"Audio details: {message.audio}")
-        
-    elif message.animation:
-        print("==== Animation Detected ====")
-        print(f"Animation details: {message.animation}")
-
-    elif message.forward_from:
-        print("==== Forwarded Message Detected ====")
-        print(f"From: {message.forward_from.username} (ID: {message.forward_from.id})")
-    
-    elif message.reply_markup and message.reply_markup.inline_keyboard:
-        print("==== Inline Buttons Detected ====")
-        print(f"Inline keyboard: {message.reply_markup.inline_keyboard}")
-    
-    elif message.text:
-        print("==== Text Message Detected ====")
-        print(f"Text: {message.text}")
-
-    message_text = message.text.lower()
 
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
