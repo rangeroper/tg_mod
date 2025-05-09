@@ -329,7 +329,6 @@ def check_message(update: Update, context: CallbackContext):
                         until_date = message.date + timedelta(seconds=MUTE_DURATION)
                         permissions = ChatPermissions(can_send_messages=False)
                         context.bot.restrict_chat_member(chat_id=chat_id, user_id=spammer_id, permissions=permissions, until_date=until_date)
-                        context.bot.send_message(chat_id=chat_id, text=f"User {spammer_id} has been muted for 3 days.")
                         print(f"Muted user {spammer_id} for spam message.")
                     except Exception as e:
                         print(f"Failed to mute spammer {spammer_id}: {e}")
