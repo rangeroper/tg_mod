@@ -4,7 +4,7 @@ import json
 import subprocess
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, CallbackQueryHandler
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, Filters
 from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone, time
 from combot.scheduled_warnings import messages
@@ -200,6 +200,32 @@ def contains_non_x_links(text: str) -> bool:
             return True  # Found a non-X link
     return False
 
+# Suspicious auto-ban function
+def handle_new_members(update, context):
+    message = update.message
+    if message is None or not message.new_chat_members:
+        return
+
+    chat_id = message.chat.id
+
+    for new_user in message.new_chat_members:
+        name = new_user.full_name or "No Name"
+        username = new_user.username or "No Username"
+        user_id = new_user.id
+
+        name_info = f"Name: {name}, Username: @{username}" if new_user.username else f"Name: {name} (no username)"
+        print(f"[JOIN] {name_info} (ID: {user_id})")
+
+        name_lower = name.lower()
+        username_lower = username.lower()
+
+        if any(keyword in name_lower or keyword in username_lower for keyword in SUSPICIOUS_USERNAMES):
+            try:
+                context.bot.ban_chat_member(chat_id, user_id)
+                print(f"[BANNED] Suspicious user auto-banned: {name_info}")
+            except Exception as e:
+                print(f"[ERROR] Failed to ban {user_id}: {e}")
+
 def check_message(update: Update, context: CallbackContext):
     should_skip_spam_check = False
     
@@ -387,23 +413,17 @@ def list_filters(update: Update, context: CallbackContext):
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
-
-    # Get the JobQueue from the dispatcher
     job_queue = updater.job_queue
 
-    # combot alerts
-
+    # Scheduled jobs
     job_queue.run_daily(lambda context: post_security_message(context, 0), time=time(hour=8, minute=0))  
     job_queue.run_daily(lambda context: post_security_message(context, 1), time=time(hour=16, minute=0))
     job_queue.run_daily(post_brand_assets, time=time(hour=0, minute=0))
-
-    # check for expiring SPAM_RECORDS
     job_queue.run_repeating(cleanup_spam_records, interval=60, first=60)
 
-    # output filters
+    # Message and command handlers
     dp.add_handler(CommandHandler("filters", list_filters))
-
-    # Add text and command message handler
+    dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_members))
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
 
     updater.start_polling()
