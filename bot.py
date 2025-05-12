@@ -33,6 +33,10 @@ SUSPICIOUS_USERNAMES = [
     "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent", "arch_agent", "arch agent", "support", "helpdesk", "administrator", "arc admin", "arc_admin"
 ]
 
+BIO_PHRASES = [
+    "verify in bio", "link in bio", "read bio", "look at bio", "info in bio"
+]
+
 # Mute duration in seconds (3 days)
 MUTE_DURATION = 3 * 24 * 60 * 60
 
@@ -219,12 +223,22 @@ def handle_new_members(update, context):
         name_lower = name.lower()
         username_lower = username.lower()
 
+        # Check for suspicious keywords in name
         if any(keyword in name_lower or keyword in username_lower for keyword in SUSPICIOUS_USERNAMES):
             try:
                 context.bot.ban_chat_member(chat_id, user_id)
                 print(f"[BANNED] Suspicious user auto-banned: {name_info}")
+                continue
             except Exception as e:
                 print(f"[ERROR] Failed to ban {user_id}: {e}")
+
+        # Check for bio phrases in name
+        if any(keyword in name_lower or keyword in username_lower for keyword in BIO_PHRASES):
+            try:
+                context.bot.ban_chat_member(chat_id, user_id)
+                print(f"[BANNED] User with suspicious name (bio phrase): {name_info}")
+            except Exception as e:
+                print(f"[ERROR] Failed to ban user with bio phrase in name {user_id}: {e}")
 
 def check_message(update: Update, context: CallbackContext):
     should_skip_spam_check = False
@@ -275,6 +289,12 @@ def check_message(update: Update, context: CallbackContext):
         name_username = f"{user.full_name} {user.username or ''}".lower()
         if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
             context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+            return
+        
+        # Auto-ban based on bio-like phrases in name/username
+        if any(keyword in name_username for keyword in BIO_PHRASES):
+            context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+            print(f"[BANNED] Bio phrase detected in name: {name_username}")
             return
         
         # Delete message if it contains non-X links
