@@ -264,7 +264,6 @@ def list_filters(update: Update, context: CallbackContext):
         update.message.reply_text(response, parse_mode="Markdown")
 
 def check_message(update: Update, context: CallbackContext):
-    print(f"[ANY MESSAGE] From chat ID: {update.message.chat.id}, text: {update.message.text}")
     should_skip_spam_check = False
     
     message = update.message or update.channel_post  # Handle both messages and channel posts
@@ -466,7 +465,6 @@ def main():
     dp.add_handler(CommandHandler("filters", list_filters))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_members))
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
-    dp.add_handler(MessageHandler(Filters.text | Filters.command, check_middleware_message))
 
     updater.start_polling()
     updater.idle()
