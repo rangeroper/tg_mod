@@ -10,7 +10,10 @@ from datetime import datetime, timedelta, timezone, time
 from combot.scheduled_warnings import messages
 from combot.brand_assets import messages as brand_assets_messages
 
+from middleware_listener import check_middleware_message
+
 load_dotenv()  # Load .env vars
+
 
 # Get bot token from environment
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -462,6 +465,7 @@ def main():
     dp.add_handler(CommandHandler("filters", list_filters))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_members))
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
+    dp.add_handler(MessageHandler(Filters.text | Filters.command, check_middleware_message))
 
     updater.start_polling()
     updater.idle()
