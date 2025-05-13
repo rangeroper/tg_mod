@@ -264,6 +264,7 @@ def list_filters(update: Update, context: CallbackContext):
         update.message.reply_text(response, parse_mode="Markdown")
 
 def check_message(update: Update, context: CallbackContext):
+    print(f"[ANY MESSAGE] From chat ID: {update.message.chat.id}, text: {update.message.text}")
     should_skip_spam_check = False
     
     message = update.message or update.channel_post  # Handle both messages and channel posts
