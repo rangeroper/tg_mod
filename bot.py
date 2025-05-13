@@ -410,41 +410,46 @@ def check_message(update: Update, context: CallbackContext):
                 message.reply_text(response_text)
             return  # Respond only once
         
-def check_middleware_message(update: Update, context: CallbackContext):
-    message = update.message or update.channel_post
-    if not message:
-        print("No message or channel post detected in middleware group.")
-        return
+# def check_middleware_message(update: Update, context: CallbackContext):
+#     message = update.message or update.channel_post
+#     if not message:
+#         print("No message or channel post detected in middleware group.")
+#         return
 
-    chat_id = update.effective_chat.id
-    message_text = message.text or ""
+#     chat_id = update.effective_chat.id
+#     message_text = message.text or ""
 
-    # Ensure this handler only processes messages from the middleware group
-    if chat_id != MIDDLEWARE_CHAT_ID:
-        return  # Only listen to middleware group here
+#     # Ensure this handler only processes messages from the middleware group
+#     if chat_id != MIDDLEWARE_CHAT_ID:
+#         return  # Only listen to middleware group here
 
-    # Check if the message starts with '/say'
-    if message_text.lower().startswith('/say '):
-        say_message = message_text[5:].strip()  # Remove "/say "
+#     # Check if the message starts with '/say'
+#     if message_text.lower().startswith('/say '):
+#         say_message = message_text[5:].strip()  # Remove "/say "
         
-        if say_message:
-            try:
-                context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-            except Exception as e:
-                print(f"Failed to delete /say command in middleware: {e}")
+#         if say_message:
+#             try:
+#                 context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+#             except Exception as e:
+#                 print(f"Failed to delete /say command in middleware: {e}")
 
-            try:
-                context.bot.send_message(
-                    chat_id=GROUP_CHAT_ID,
-                    text=say_message,
-                    parse_mode=ParseMode.HTML
-                )
-                print(f"Relayed /say from middleware to main group: {say_message}")
-            except Exception as e:
-                print(f"Failed to send message to main group: {e}")
-        else:
-            print("Empty /say command in middleware, skipping.")
+#             try:
+#                 context.bot.send_message(
+#                     chat_id=GROUP_CHAT_ID,
+#                     text=say_message,
+#                     parse_mode=ParseMode.HTML
+#                 )
+#                 print(f"Relayed /say from middleware to main group: {say_message}")
+#             except Exception as e:
+#                 print(f"Failed to send message to main group: {e}")
+#         else:
+#             print("Empty /say command in middleware, skipping.")
 
+# This will be triggered whenever a message is received in the middleware group
+def check_middleware_message(update, context):
+    # Only listen to messages from the middleware chat ID
+    if update.message.chat.id == MIDDLEWARE_CHAT_ID:
+        print(f"Message from middleware group: {update.message.text}")
 
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
@@ -462,7 +467,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_members))
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
 
-    dp.add_handler(MessageHandler(Filters.chat(chat_id=MIDDLEWARE_CHAT_ID) & Filters.text, check_middleware_message))
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_middleware_message))
 
     updater.start_polling()
     updater.idle()
