@@ -12,7 +12,6 @@ from combot.brand_assets import messages as brand_assets_messages
 
 load_dotenv()  # Load .env vars
 
-
 # Get bot token from environment
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 GROUP_CHAT_ID = os.getenv('GROUP_CHAT_ID')

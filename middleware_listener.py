@@ -6,7 +6,7 @@ from telegram.ext import Updater, MessageHandler, Filters
 load_dotenv()
 
 # Bot token and middleware group ID
-BOT_TOKEN = os.getenv("MIDDLEWARE_BOT_TOKEN")
+MIDDLEWARE_BOT_TOKEN = os.getenv("MIDDLEWARE_BOT_TOKEN")
 MIDDLEWARE_CHAT_ID = int(os.getenv("MIDDLEWARE_CHAT_ID"))
 
 # Message handler function
@@ -16,7 +16,8 @@ def handle_middleware_message(update, context):
 
 # Start the bot
 def main():
-    updater = Updater(BOT_TOKEN, use_context=True)
+    print("starting middleware")
+    updater = Updater(MIDDLEWARE_BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
 
     # Only handle messages from the middleware group
