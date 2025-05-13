@@ -10,8 +10,6 @@ from datetime import datetime, timedelta, timezone, time
 from combot.scheduled_warnings import messages
 from combot.brand_assets import messages as brand_assets_messages
 
-from middleware_listener import check_middleware_message
-
 load_dotenv()  # Load .env vars
 
 
