@@ -419,9 +419,11 @@ def check_middleware_message(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     message_text = message.text or ""
 
+    # Ensure this handler only processes messages from the middleware group
     if chat_id != MIDDLEWARE_CHAT_ID:
         return  # Only listen to middleware group here
 
+    # Check if the message starts with '/say'
     if message_text.lower().startswith('/say '):
         say_message = message_text[5:].strip()  # Remove "/say "
         
@@ -460,7 +462,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_members))
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
 
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_middleware_message))
+    dp.add_handler(MessageHandler(Filters.chat(chat_id=MIDDLEWARE_CHAT_ID) & Filters.text, check_middleware_message))
 
     updater.start_polling()
     updater.idle()
