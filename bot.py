@@ -447,6 +447,7 @@ def check_message(update: Update, context: CallbackContext):
 # This will be triggered whenever a message is received in the middleware group
 
 def main():
+    print("starting bot")
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
     job_queue = updater.job_queue

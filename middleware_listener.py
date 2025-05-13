@@ -15,6 +15,7 @@ def check_middleware_message(update, context):
         print(f"Message from middleware group: {update.message.text}")
 
 def main():
+    print("Starting middleware_listener")
     # Initialize the Updater with the bot token
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
