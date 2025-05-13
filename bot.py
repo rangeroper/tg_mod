@@ -15,7 +15,6 @@ load_dotenv()  # Load .env vars
 # Get bot token from environment
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 GROUP_CHAT_ID = os.getenv('GROUP_CHAT_ID')
-MIDDLEWARE_CHAT_ID = os.getenv('MIDDLEWARE_CHAT_ID')
 
 # File path for filters
 FILTERS_FILE = "filters/filters.json"
@@ -446,10 +445,6 @@ def check_message(update: Update, context: CallbackContext):
 #             print("Empty /say command in middleware, skipping.")
 
 # This will be triggered whenever a message is received in the middleware group
-def check_middleware_message(update, context):
-    # Only listen to messages from the middleware chat ID
-    if update.message.chat.id == MIDDLEWARE_CHAT_ID:
-        print(f"Message from middleware group: {update.message.text}")
 
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
@@ -466,8 +461,6 @@ def main():
     dp.add_handler(CommandHandler("filters", list_filters))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_members))
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
-
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_middleware_message))
 
     updater.start_polling()
     updater.idle()
