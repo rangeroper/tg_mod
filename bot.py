@@ -15,6 +15,7 @@ load_dotenv()  # Load .env vars
 # Get bot token from environment
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 GROUP_CHAT_ID = os.getenv('GROUP_CHAT_ID')
+MIDDLEWARE_CHAT_ID = os.getenv('MIDDLEWARE_CHAT_ID')
 
 # File path for filters
 FILTERS_FILE = "filters/filters.json"
@@ -240,6 +241,26 @@ def handle_new_members(update, context):
             except Exception as e:
                 print(f"[ERROR] Failed to ban user with bio phrase in name {user_id}: {e}")
 
+def list_filters(update: Update, context: CallbackContext):
+    # Load the latest filters
+    with open(FILTERS_FILE, 'r', encoding='utf-8') as f:
+        filters = json.load(f)
+
+    # Get and sort all triggers alphabetically (removing leading slash only for sorting)
+    sorted_triggers = sorted(filters.keys(), key=lambda k: k.lstrip('/').lower())
+
+    # Re-apply slash only if the original trigger had it
+    formatted_triggers = [f"`{trigger}`" for trigger in sorted_triggers]
+
+    # Telegram messages max out at 4096 characters
+    response = "*Available Filters:*\n" + "\n".join(formatted_triggers)
+    if len(response) > 4000:
+        for i in range(0, len(formatted_triggers), 80):  # 80 items per message chunk
+            chunk = "*Available Filters:*\n" + "\n".join(formatted_triggers[i:i+80])
+            update.message.reply_text(chunk, parse_mode="Markdown")
+    else:
+        update.message.reply_text(response, parse_mode="Markdown")
+
 def check_message(update: Update, context: CallbackContext):
     should_skip_spam_check = False
     
@@ -256,26 +277,6 @@ def check_message(update: Update, context: CallbackContext):
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
     admin_ids = [admin.user.id for admin in chat_admins]
-    
-    # If the message starts with /say, the bot will send a message on behalf of the admin
-    if message_text.startswith('/say '):
-        # Ensure the user is an admin (using admin_ids already fetched)
-        if user_id in admin_ids:
-            # Get the message after the /say command
-            say_message = message_text[len('/say '):].strip()
-                        
-            # Ensure the message is not empty
-            if say_message:
-                context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-                # Send the message as the bot
-                context.bot.send_message(
-                    chat_id=chat_id,
-                    text=say_message,
-                    parse_mode=ParseMode.HTML  # If you want to support HTML formatting
-                )
-            else:
-                print("Empty say_message, skipping send.") 
-            return  # After processing /say, exit the function
     
     # Ignore messages from admins
     if user_id not in admin_ids:
@@ -408,26 +409,40 @@ def check_message(update: Update, context: CallbackContext):
             elif response_text:
                 message.reply_text(response_text)
             return  # Respond only once
+        
+def check_middleware_message(update: Update, context: CallbackContext):
+    message = update.message or update.channel_post
+    if not message:
+        print("No message or channel post detected in middleware group.")
+        return
 
-def list_filters(update: Update, context: CallbackContext):
-    # Load the latest filters
-    with open(FILTERS_FILE, 'r', encoding='utf-8') as f:
-        filters = json.load(f)
+    chat_id = update.effective_chat.id
+    message_text = message.text or ""
 
-    # Get and sort all triggers alphabetically (removing leading slash only for sorting)
-    sorted_triggers = sorted(filters.keys(), key=lambda k: k.lstrip('/').lower())
+    if chat_id != MIDDLEWARE_CHAT_ID:
+        return  # Only listen to middleware group here
 
-    # Re-apply slash only if the original trigger had it
-    formatted_triggers = [f"`{trigger}`" for trigger in sorted_triggers]
+    if message_text.lower().startswith('/say '):
+        say_message = message_text[5:].strip()  # Remove "/say "
+        
+        if say_message:
+            try:
+                context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            except Exception as e:
+                print(f"Failed to delete /say command in middleware: {e}")
 
-    # Telegram messages max out at 4096 characters
-    response = "*Available Filters:*\n" + "\n".join(formatted_triggers)
-    if len(response) > 4000:
-        for i in range(0, len(formatted_triggers), 80):  # 80 items per message chunk
-            chunk = "*Available Filters:*\n" + "\n".join(formatted_triggers[i:i+80])
-            update.message.reply_text(chunk, parse_mode="Markdown")
-    else:
-        update.message.reply_text(response, parse_mode="Markdown")
+            try:
+                context.bot.send_message(
+                    chat_id=GROUP_CHAT_ID,
+                    text=say_message,
+                    parse_mode=ParseMode.HTML
+                )
+                print(f"Relayed /say from middleware to main group: {say_message}")
+            except Exception as e:
+                print(f"Failed to send message to main group: {e}")
+        else:
+            print("Empty /say command in middleware, skipping.")
+
 
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
@@ -444,6 +459,8 @@ def main():
     dp.add_handler(CommandHandler("filters", list_filters))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_members))
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
+
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_middleware_message))
 
     updater.start_polling()
     updater.idle()
