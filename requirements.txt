@@ -64,7 +64,7 @@ tzlocal==5.3.1
     #   apscheduler
 urllib3==1.26.20
     # via requests
-werkzeug==1.0.1
+werkzeug==2.3.7
 
     # via flask
 
