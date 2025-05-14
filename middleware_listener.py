@@ -46,6 +46,9 @@ def log_everything(update: Update, context: CallbackContext):
     message = update.message or update.edited_message or update.channel_post or update.edited_channel_post
     if not message:
         return
+    
+    is_forwarded = hasattr(message, 'forward_from') or hasattr(message, 'forward_from_chat')
+    is_automatic_forward = hasattr(message, 'is_automatic_forward') and message.is_automatic_forward
 
     # Log simple message details (forwarded or not)
     log_data = {
@@ -53,7 +56,8 @@ def log_everything(update: Update, context: CallbackContext):
         "message_id": message.message_id,
         "from_user_id": message.from_user.id if message.from_user else "N/A",
         "text": message.text or "<No Text>",
-        "forwarded": "Yes" if message.forward_from or message.forward_from_chat else "No",
+        "is_forwarded": "Yes" if is_forwarded else "No",
+        "is_automatic_forward": "Yes" if is_automatic_forward else "No",
         "has_photo": bool(message.photo),
         "has_video": bool(message.video),
         "has_document": bool(message.document),
