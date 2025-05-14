@@ -3,6 +3,7 @@ import json
 import requests
 from dotenv import load_dotenv
 from telegram import Bot
+from flask import Flask, request
 from telegram.ext import Updater
 
 load_dotenv()
@@ -18,6 +19,9 @@ headers = {
 }
 
 middleware_bot = Bot(token=MIDDLEWARE_BOT_TOKEN)
+
+# Flask app for the webhook server
+app = Flask(__name__)
 
 def parse_transaction_data(data):
     try:
@@ -47,3 +51,21 @@ def pass_message_to_bot(transaction_data):
     except Exception as e:
         print(f"Failed to send message to Telegram group: {e}")
 
+# Webhook route to receive Helius transaction data
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    data = request.json  # Assuming the Helius API sends a JSON payload
+    print(f"Received webhook data: {data}")
+    
+    # Parse and process the transaction data
+    transaction_data = parse_transaction_data(data)
+    
+    if transaction_data:
+        pass_message_to_bot(transaction_data)
+        return "OK", 200
+    else:
+        return "No valid transaction data", 400
+
+if __name__ == '__main__':
+    # Start Flask server
+    app.run(debug=True, host='0.0.0.0', port=5000)
