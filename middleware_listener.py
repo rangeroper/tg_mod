@@ -43,6 +43,8 @@ def handle_say_command(update: Update, context: CallbackContext):
             print(f"Failed to send /say message to main group: {e}")
 
 def log_everything(update: Update, context: CallbackContext):
+    print("Full Update:", update)
+    
     message = update.message or update.edited_message or update.channel_post or update.edited_channel_post
     if not message:
         return
