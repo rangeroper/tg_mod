@@ -2,7 +2,7 @@ import os
 import re
 from dotenv import load_dotenv
 from telegram import Update, ParseMode, Bot
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
+from telegram.ext import TypeHandler, Updater, MessageHandler, Filters, CallbackContext, CommandHandler
 
 # Load .env variables
 load_dotenv()
@@ -124,7 +124,7 @@ def main():
     dp = updater.dispatcher
 
     dp.add_handler(MessageHandler(Filters.regex('^/say '), handle_say_command))
-    dp.add_handler(MessageHandler(Filters.all, log_everything), group=0)
+    dp.add_handler(TypeHandler(Update, log_everything), group=999)
 
     updater.start_polling()
     updater.idle()
