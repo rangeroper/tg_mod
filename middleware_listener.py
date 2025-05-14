@@ -15,10 +15,6 @@ GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
 # separate instance of bot using the main group chat bot
 main_bot = Bot(token=BOT_TOKEN)
 
-def debug_all_updates(update: Update, context: CallbackContext):
-    print("Received raw update:")
-    print(update)
-
 def handle_say_command(update: Update, context: CallbackContext):
     message = update.message or update.channel_post
     if not message:
@@ -87,15 +83,13 @@ def handle_buy_bot_notifications(update: Update, context: CallbackContext):
     else:
         print("Empty buy bot message detected, skipping.")
 
-
 def main():
     print("Starting middleware listener bot...")
     updater = Updater(MIDDLEWARE_BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
     
-    dp.add_handler(MessageHandler(Filters.all, debug_all_updates), block=False)
-    dp.add_handler(MessageHandler(Filters.text & Filters.regex('^/say '), handle_say_command, block=False))
-    dp.add_handler(MessageHandler(Filters.all, handle_buy_bot_notifications, block=False))
+    dp.add_handler(MessageHandler(Filters.text & Filters.regex('^/say '), handle_say_command))
+    dp.add_handler(MessageHandler(Filters.text, handle_buy_bot_notifications))
 
     updater.start_polling()
     updater.idle()
