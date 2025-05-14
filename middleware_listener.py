@@ -35,14 +35,18 @@ def is_deluge_buy_bot_message(message):
     
     # Common patterns in Deluge buy bot messages
     deluge_patterns = [
-        r"(🟢|🔴) \w+ (Buy|Sell)",  # Green/Red circle with Buy/Sell
-        r"\[\d+\.\d+%\]",           # Percentage in brackets
-        r"Price: \$[\d,.]+",         # Price format
-        r"Amount: \$[\d,.]+",        # Amount format
-        r"Mcap: \$[\d,.]+M",         # Market cap format
-        r"LP: \$[\d,.]+",            # LP format
-        r"Contract: 0x[a-fA-F0-9]+", # Contract address format
-        r"(Deluge Buy Bot|D.BuyBot)" # Bot name in text
+        r"Buy!",                     # Buy indicator
+        r"\(https://t\.me/\+[\w\d]+\)",  # Telegram invite link
+        r"🔀 \d+\.?\d* (SOL|ETH|BTC)",   # Transaction amount format
+        r"👤 [\w\d]+\.{3}[\w\d]+",       # Wallet address shortened format
+        r"Position: \d+\.?\d*% Up!",     # Position up indicator
+        r"Market Cap \$[\d,]+",          # Market cap format
+        r"⚪️🙂",                         # Emoji pattern seen in the messages
+        r"Chart \(https://",             # Chart link
+        r"Txn \(https://",               # Transaction link
+        r"⬆️ Position",                  # Position up indicator with emoji
+        r"💸 Market Cap",                # Market cap with emoji
+        r"📈 Chart"                      # Chart with emoji
     ]
     
     # Check if the sender is the buy bot (if sender info is available)
