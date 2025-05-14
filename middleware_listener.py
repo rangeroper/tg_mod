@@ -68,9 +68,7 @@ def handle_buy_command(update: Update, context: CallbackContext):
                     video=video,
                     caption=buy_message,
                     parse_mode=ParseMode.HTML,
-                    supports_streaming=True,
-                    disable_web_page_preview=True
-                )
+                    supports_streaming=True                )
             print(f"Relayed /buy command with video caption: {buy_message}")
         except Exception as e:
             print(f"Failed to send /buy video message to main group: {e}")
