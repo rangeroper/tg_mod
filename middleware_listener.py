@@ -1,8 +1,7 @@
 import os
 from dotenv import load_dotenv
-from telegram import Update, ParseMode, Bot
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
-
+from telethon import TelegramClient, events
+from telegram import Bot, ParseMode
 
 # Load .env variables
 load_dotenv()
@@ -11,29 +10,28 @@ load_dotenv()
 MIDDLEWARE_BOT_TOKEN = os.getenv("MIDDLEWARE_BOT_TOKEN")
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
+TG_API_ID=os.getenv('TG_API_ID')
+TG_API_HASH=os.getenv('TG_API_HASH')
+
+client = TelegramClient('middleware_listener', TG_API_ID, TG_API_HASH)
 
 # separate instance of bot using the main group chat bot
 main_bot = Bot(token=BOT_TOKEN)
 
-def handle_say_command(update: Update, context: CallbackContext):
-    message = update.message or update.channel_post
-    if not message:
-        print("No message or channel post detected in middleware group.")
-        return
-
-    message_text = message.text or ""
-
-    if message_text.lower().startswith('/say '):
-        say_message = message_text[5:].strip()
-
+# Handle '/say' commands in the middleware chat
+async def handle_say_command(message):
+    if message.text and message.text.lower().startswith('/say '):
+        say_message = message.text[5:].strip()
+        
         if say_message:
             try:
-                context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message.message_id)
+                await message.delete()
             except Exception as e:
                 print(f"Failed to delete /say command in middleware: {e}")
 
             try:
-                main_bot.send_message(
+                # Forward message to the main group
+                await main_bot.send_message(
                     chat_id=GROUP_CHAT_ID,
                     text=say_message,
                     parse_mode=ParseMode.HTML
@@ -44,55 +42,48 @@ def handle_say_command(update: Update, context: CallbackContext):
         else:
             print("Empty /say command in middleware, skipping.")
 
-def handle_buy_bot_notifications(update: Update, context: CallbackContext):
-    message = update.message or update.channel_post
-    if not message:
-        print("No message or channel post detected in middleware group.")
-        return
-
+async def handle_buy_bot_notifications(message):
     # Ensure the message is from @delugebuybot or display name "D.BuyBot"
-    if not message.from_user:
-        print("Message has no sender, skipping.")
-        return
+    if message.sender.username == "delugebuybot" or message.sender.first_name == "D.BuyBot":
+        message_text = message.text or ""
+        print(f"Received buy bot notification: {message_text}")
 
-    username = message.from_user.username or ""
-    full_name = f"{message.from_user.first_name or ''} {message.from_user.last_name or ''}".strip()
+        if message_text.strip():
+            try:
+                await message.delete()
+            except Exception as e:
+                print(f"Failed to delete buy bot message in middleware: {e}")
 
-    if username.lower() != "delugebuybot" and full_name != "D.BuyBot":
-        print(f"Message is not from @delugebuybot or name 'D.BuyBot' (username: {username}, full name: {full_name}), skipping.")
-        return
+            try:
+                # Forward buy bot message to the main group
+                await main_bot.send_message(
+                    chat_id=GROUP_CHAT_ID,
+                    text=message_text,
+                    parse_mode=ParseMode.HTML
+                )
+                print("Forwarded buy bot notification to main group.")
+            except Exception as e:
+                print(f"Failed to send buy bot notification to main group: {e}")
+        else:
+            print("Empty buy bot message detected, skipping.")
 
-    message_text = message.text or ""
-    print(f"Received buy bot notification: {message_text}")
+@client.on(events.NewMessage)
+async def message_handler(event):
+    message = event.message
 
-    if message_text.strip():
-        try:
-            context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message.message_id)
-        except Exception as e:
-            print(f"Failed to delete buy bot message in middleware: {e}")
+    # Handle '/say' command
+    if message.text and message.text.lower().startswith('/say '):
+        await handle_say_command(message)
 
-        try:
-            main_bot.send_message(
-                chat_id=GROUP_CHAT_ID,
-                text=message_text,
-                parse_mode=ParseMode.HTML
-            )
-            print("Forwarded buy bot notification to main group.")
-        except Exception as e:
-            print(f"Failed to send buy bot notification to main group: {e}")
-    else:
-        print("Empty buy bot message detected, skipping.")
+    # Handle buy bot notifications
+    elif message.sender and (message.sender.username == "delugebuybot" or message.sender.first_name == "D.BuyBot"):
+        await handle_buy_bot_notifications(message)
 
 def main():
     print("Starting middleware listener bot...")
-    updater = Updater(MIDDLEWARE_BOT_TOKEN, use_context=True)
-    dp = updater.dispatcher
-    
-    dp.add_handler(MessageHandler(Filters.text & Filters.regex('^/say '), handle_say_command))
-    dp.add_handler(MessageHandler(Filters.text, handle_buy_bot_notifications))
-
-    updater.start_polling()
-    updater.idle()
+    # Start the Telethon client
+    client.start()
+    client.run_until_disconnected()
 
 if __name__ == '__main__':
     main()
