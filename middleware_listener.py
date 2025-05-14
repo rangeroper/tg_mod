@@ -15,8 +15,7 @@ GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
 # separate instance of bot using the main group chat bot
 main_bot = Bot(token=BOT_TOKEN)
 
-# Function to handle /say messages in middleware
-def check_middleware_message(update: Update, context: CallbackContext):
+def handle_say_command(update: Update, context: CallbackContext):
     message = update.message or update.channel_post
     if not message:
         print("No message or channel post detected in middleware group.")
@@ -45,33 +44,40 @@ def check_middleware_message(update: Update, context: CallbackContext):
         else:
             print("Empty /say command in middleware, skipping.")
 
-# Handle Buy Bot Notifications
-def check_other_messages(update: Update, context: CallbackContext):
-    message = update.message or update.channel_post
-    if not message:
-        print("No message or channel post detected.")
-        return
+# def handle_buy_bot_notifications(update: Update, context: CallbackContext):
+#     message = update.message or update.channel_post
+#     if not message:
+#         print("No message or channel post detected in middleware group.")
+#         return
 
-    message_text = message.text or ""
-    print(f"Received buy bot notification: {message_text}")
+#     message_text = message.text or ""
+#     print(f"Received buy bot notification: {message_text}")
 
-    try:
-        main_bot.send_message(
-            chat_id=GROUP_CHAT_ID,
-            text=message_text,
-            parse_mode=ParseMode.HTML
-        )
-        print("Forwarded buy bot notification to main group.")
-    except Exception as e:
-        print(f"Failed to send buy bot notification to main group: {e}")
+#     if message_text.strip():
+#         try:
+#             context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message.message_id)
+#         except Exception as e:
+#             print(f"Failed to delete buy bot message in middleware: {e}")
+
+#         try:
+#             main_bot.send_message(
+#                 chat_id=GROUP_CHAT_ID,
+#                 text=message_text,
+#                 parse_mode=ParseMode.HTML
+#             )
+#             print("Forwarded buy bot notification to main group.")
+#         except Exception as e:
+#             print(f"Failed to send buy bot notification to main group: {e}")
+#     else:
+#         print("Empty buy bot message detected, skipping.")
 
 def main():
     print("Starting middleware listener bot...")
     updater = Updater(MIDDLEWARE_BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
 
-    dp.add_handler(MessageHandler(Filters.text & Filters.regex('^/say '), check_middleware_message))
-    dp.add_handler(MessageHandler(Filters.text, check_other_messages))
+    dp.add_handler(MessageHandler(Filters.text & Filters.regex('^/say '), handle_say_command))
+    dp.add_handler(MessageHandler(Filters.text, handle_buy_bot_notifications))
 
     updater.start_polling()
     updater.idle()
