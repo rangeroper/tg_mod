@@ -49,10 +49,17 @@ def handle_buy_bot_notifications(update: Update, context: CallbackContext):
     if not message:
         print("No message or channel post detected in middleware group.")
         return
-    
-    # Ensure the message is from @delugebuybot
-    if not message.from_user or message.from_user.username != "delugebuybot":
-        print("Message is not from @delugebuybot, skipping.")
+
+    # Ensure the message is from @delugebuybot or display name "D.BuyBot"
+    if not message.from_user:
+        print("Message has no sender, skipping.")
+        return
+
+    username = message.from_user.username or ""
+    full_name = f"{message.from_user.first_name or ''} {message.from_user.last_name or ''}".strip()
+
+    if username.lower() != "delugebuybot" and full_name != "D.BuyBot":
+        print(f"Message is not from @delugebuybot or name 'D.BuyBot' (username: {username}, full name: {full_name}), skipping.")
         return
 
     message_text = message.text or ""
@@ -75,6 +82,7 @@ def handle_buy_bot_notifications(update: Update, context: CallbackContext):
             print(f"Failed to send buy bot notification to main group: {e}")
     else:
         print("Empty buy bot message detected, skipping.")
+
 
 def main():
     print("Starting middleware listener bot...")
