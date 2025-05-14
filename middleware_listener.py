@@ -13,7 +13,7 @@ GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
 TG_API_ID=os.getenv('TG_API_ID')
 TG_API_HASH=os.getenv('TG_API_HASH')
 
-client = TelegramClient('middleware_listener', TG_API_ID, TG_API_HASH)
+client = TelegramClient('bot', TG_API_ID, TG_API_HASH).start(bot_token=MIDDLEWARE_BOT_TOKEN)
 
 # separate instance of bot using the main group chat bot
 main_bot = Bot(token=BOT_TOKEN)
