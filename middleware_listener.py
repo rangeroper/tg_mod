@@ -42,11 +42,42 @@ def handle_say_command(update: Update, context: CallbackContext):
         except Exception as e:
             print(f"Failed to send /say message to main group: {e}")
 
+def handle_buy_command(update: Update, context: CallbackContext):
+    message = update.message or update.channel_post
+    if not message:
+        return
+
+    message_text = message.text or ""
+    buy_message = ""
+
+    if message_text.lower().startswith('/buy '):
+        buy_message = message_text[5:].strip()
+
+    if buy_message:
+        try:
+            context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message.message_id)
+        except Exception as e:
+            print(f"Failed to delete /buy command: {e}")
+
+        try:
+            with open("/media/deluge/arc_gif.mp4", "rb") as video:
+                main_bot.send_video(
+                    chat_id=GROUP_CHAT_ID,
+                    video=video,
+                    caption=buy_message,
+                    parse_mode=ParseMode.HTML,
+                    supports_streaming=True
+                )
+            print(f"Relayed /buy command with video caption: {buy_message}")
+        except Exception as e:
+            print(f"Failed to send /buy video message to main group: {e}")
+
 def main():
     updater = Updater(MIDDLEWARE_BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(MessageHandler(Filters.regex('^/say '), handle_say_command))
+    dp.add_handler(MessageHandler(Filters.regex('^/buy '), handle_buy_command))
 
     updater.start_polling()
     updater.idle()
