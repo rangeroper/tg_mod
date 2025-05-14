@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from telegram import Update, ParseMode
+from telegram import Update, ParseMode, Bot
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 
 
@@ -9,7 +9,11 @@ load_dotenv()
 
 # Bot token and group chat ID
 MIDDLEWARE_BOT_TOKEN = os.getenv("MIDDLEWARE_BOT_TOKEN")
+BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
+
+# separate instance of bot using the main group chat bot
+main_bot = Bot(token=BOT_TOKEN)
 
 # Function to handle /say messages in middleware
 def check_middleware_message(update: Update, context: CallbackContext):
@@ -20,9 +24,8 @@ def check_middleware_message(update: Update, context: CallbackContext):
 
     message_text = message.text or ""
 
-    # Check if the message starts with '/say'
     if message_text.lower().startswith('/say '):
-        say_message = message_text[5:].strip()  # Remove "/say " from message output
+        say_message = message_text[5:].strip()
 
         if say_message:
             try:
@@ -31,7 +34,7 @@ def check_middleware_message(update: Update, context: CallbackContext):
                 print(f"Failed to delete /say command in middleware: {e}")
 
             try:
-                context.bot.send_message(
+                main_bot.send_message(
                     chat_id=GROUP_CHAT_ID,
                     text=say_message,
                     parse_mode=ParseMode.HTML
@@ -50,8 +53,17 @@ def check_other_messages(update: Update, context: CallbackContext):
         return
 
     message_text = message.text or ""
-
     print(f"Received buy bot notification: {message_text}")
+
+    try:
+        main_bot.send_message(
+            chat_id=GROUP_CHAT_ID,
+            text=message_text,
+            parse_mode=ParseMode.HTML
+        )
+        print("Forwarded buy bot notification to main group.")
+    except Exception as e:
+        print(f"Failed to send buy bot notification to main group: {e}")
 
 def main():
     print("Starting middleware listener bot...")
