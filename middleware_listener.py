@@ -77,7 +77,7 @@ def main():
     dp = updater.dispatcher
 
     dp.add_handler(MessageHandler(Filters.text & Filters.regex('^/say '), handle_say_command))
-    dp.add_handler(MessageHandler(Filters.text, handle_buy_bot_notifications))
+    #dp.add_handler(MessageHandler(Filters.text, handle_buy_bot_notifications))
 
     updater.start_polling()
     updater.idle()
