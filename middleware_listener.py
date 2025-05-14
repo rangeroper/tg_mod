@@ -15,49 +15,7 @@ GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
 # Separate instance of bot using the main group chat bot
 main_bot = Bot(token=BOT_TOKEN)
 
-def is_deluge_buy_bot_message(message):
-    if not message or not (message.text or message.caption):
-        return False
-    
-    # Get the text content from either text or caption
-    content = message.text or message.caption or ""
-    
-    # Common patterns in Deluge buy bot messages
-    deluge_patterns = [
-        r"Buy!",                     # Buy indicator
-        r"\(https://t\.me/\+[\w\d]+\)",  # Telegram invite link
-        r"🔀 \d+\.?\d* (SOL|ETH|BTC)",   # Transaction amount format
-        r"👤 [\w\d]+\.{3}[\w\d]+",       # Wallet address shortened format
-        r"Position: \d+\.?\d*% Up!",     # Position up indicator
-        r"Market Cap \$[\d,]+",          # Market cap format
-        r"⚪️🙂",                         # Emoji pattern seen in the messages
-        r"Chart \(https://",             # Chart link
-        r"Txn \(https://",               # Transaction link
-        r"⬆️ Position",                  # Position up indicator with emoji
-        r"💸 Market Cap",                # Market cap with emoji
-        r"📈 Chart"                      # Chart with emoji
-    ]
-    
-    # Check if the sender is the buy bot (if sender info is available)
-    sender_is_buy_bot = False
-    if message.from_user:
-        username = message.from_user.username or ""
-        full_name = f"{message.from_user.first_name or ''} {message.from_user.last_name or ''}".strip()
-        sender_is_buy_bot = username.lower() == "delugebuybot" or "buybot" in full_name.lower()
-    
-    # Check if the message matches patterns from Deluge Buy Bot
-    pattern_matches = sum(1 for pattern in deluge_patterns if re.search(pattern, content)) >= 2
-    
-    # If forwarded from a channel, check channel name
-    channel_is_buy_bot = False
-    if message.forward_from_chat:
-        channel_title = message.forward_from_chat.title or ""
-        channel_is_buy_bot = "deluge" in channel_title.lower() or "buy bot" in channel_title.lower()
-    
-    return sender_is_buy_bot or pattern_matches or channel_is_buy_bot
-
 def handle_say_command(update: Update, context: CallbackContext):
-    """Handle /say commands to relay messages to the main group"""
     message = update.message or update.channel_post
     if not message:
         return
@@ -84,31 +42,9 @@ def handle_say_command(update: Update, context: CallbackContext):
         except Exception as e:
             print(f"Failed to send /say message to main group: {e}")
 
-# def handle_all_messages(update: Update, context: CallbackContext):
-#     message = update.message or update.channel_post
-#     if not message:
-#         print(f"not a message: {e}")
-#         return
-
-#     if is_deluge_buy_bot_message(message):
-#         message_text = message.text or message.caption or ""
-#         if message_text.strip():
-#             try:
-#                 context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message.message_id)
-#             except Exception as e:
-#                 print(f"Failed to delete Deluge-style message: {e}")
-
-#             try:
-#                 main_bot.send_message(
-#                     chat_id=GROUP_CHAT_ID,
-#                     text=message_text,
-#                     parse_mode=ParseMode.HTML
-#                 )
-#                 print(f"Forwarded Deluge buy bot message: {message_text}")
-#             except Exception as e:
-#                 print(f"Failed to forward Deluge-style message: {e}")
-
 def log_everything(update: Update, context: CallbackContext):
+    print("⚠️ RAW UPDATE:", update)
+
     message = (
         update.message
         or update.edited_message
@@ -117,8 +53,14 @@ def log_everything(update: Update, context: CallbackContext):
     )
 
     if not message:
-        print("No message to log.")
+        print("❌ No message found in update.")
         return
+
+    if hasattr(message, "is_automatic_forward") and message.is_automatic_forward:
+        print("✅ Detected automatic forward (likely from Deluge)")
+        print("Text:", message.text)
+        print("Caption:", message.caption)
+        print("Forwarded From Chat:", message.forward_from_chat)
 
     user = message.from_user
     chat = message.chat
@@ -134,7 +76,12 @@ def log_everything(update: Update, context: CallbackContext):
         "from_last_name": user.last_name if user else "N/A",
         "from_is_bot": user.is_bot if user else "N/A",
         "date": message.date.isoformat(),
-        "text": message.text or message.caption or None,
+        "text": (
+            message.text
+            or message.caption
+            or (message.forward_from_chat.title if message.forward_from_chat else None)
+            or "<NO TEXT>"
+        ),
         "has_photo": bool(message.photo),
         "has_video": bool(message.video),
         "has_document": bool(message.document),
@@ -155,7 +102,7 @@ def log_everything(update: Update, context: CallbackContext):
             if message.forward_from_chat else None
         ),
         "forward_signature": message.forward_signature or None,
-        "is_automatic_forward": message.is_automatic_forward if hasattr(message, "is_automatic_forward") else False,
+        "is_automatic_forward": getattr(message, "is_automatic_forward", False),
         "edit_date": message.edit_date.isoformat() if message.edit_date else None,
     }
 
@@ -164,15 +111,20 @@ def log_everything(update: Update, context: CallbackContext):
         print(f"{k}: {v}")
     print("-----------------------------")
 
+    print("🔍 Message Attributes:")
+    for attr in dir(message):
+        if not attr.startswith("_"):
+            try:
+                print(f"{attr}: {getattr(message, attr)}")
+            except Exception as e:
+                print(f"{attr}: [Error reading attribute] {e}")
 
 def main():
-    print("Starting middleware listener bot...")
     updater = Updater(MIDDLEWARE_BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(MessageHandler(Filters.regex('^/say '), handle_say_command))
     dp.add_handler(MessageHandler(Filters.all, log_everything), group=0)
-    # dp.add_handler(MessageHandler(Filters.all, handle_all_messages))
 
     updater.start_polling()
     updater.idle()
