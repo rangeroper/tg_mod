@@ -15,18 +15,7 @@ GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
 # Separate instance of bot using the main group chat bot
 main_bot = Bot(token=BOT_TOKEN)
 
-# Debug mode
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-
-def log_message(message):
-    """Helper function to log messages when DEBUG is True"""
-    if DEBUG:
-        print(message)
-
 def is_deluge_buy_bot_message(message):
-    """
-    Check if a message is from the Deluge Buy Bot based on content patterns
-    """
     if not message or not (message.text or message.caption):
         return False
     
@@ -71,106 +60,62 @@ def handle_say_command(update: Update, context: CallbackContext):
     """Handle /say commands to relay messages to the main group"""
     message = update.message or update.channel_post
     if not message:
-        log_message("No message or channel post detected in middleware group.")
         return
 
     message_text = message.text or ""
+    say_message = ""
 
     if message_text.lower().startswith('/say '):
         say_message = message_text[5:].strip()
 
-        if say_message:
-            try:
-                context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message.message_id)
-            except Exception as e:
-                log_message(f"Failed to delete /say command in middleware: {e}")
+    if say_message:
+        try:
+            context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message.message_id)
+        except Exception as e:
+            print(f"Failed to delete /say command: {e}")
 
-            try:
-                main_bot.send_message(
-                    chat_id=GROUP_CHAT_ID,
-                    text=say_message,
-                    parse_mode=ParseMode.HTML
-                )
-                log_message(f"Relayed /say from middleware to main group: {say_message}")
-            except Exception as e:
-                log_message(f"Failed to send message to main group: {e}")
-        else:
-            log_message("Empty /say command in middleware, skipping.")
+        try:
+            main_bot.send_message(
+                chat_id=GROUP_CHAT_ID,
+                text=say_message,
+                parse_mode=ParseMode.HTML
+            )
+            print(f"Relayed /say command: {say_message}")
+        except Exception as e:
+            print(f"Failed to send /say message to main group: {e}")
 
 def handle_all_messages(update: Update, context: CallbackContext):
-    """Process all messages to detect and forward buy bot notifications"""
     message = update.message or update.channel_post
     if not message:
-        log_message("No message or channel post detected.")
         return
 
-    # Log message details for debugging
-    if DEBUG:
-        sender_info = "Unknown sender"
-        if message.from_user:
-            sender_info = f"@{message.from_user.username or ''} ({message.from_user.first_name or ''} {message.from_user.last_name or ''})"
-        elif message.forward_from_chat:
-            sender_info = f"Channel: {message.forward_from_chat.title or ''}"
-        
-        log_message(f"Received message from {sender_info}")
-        log_message(f"Content: {message.text or message.caption or 'No text'}")
-    
-    # Check if it's a buy bot notification
     if is_deluge_buy_bot_message(message):
         message_text = message.text or message.caption or ""
-        log_message(f"Detected buy bot notification: {message_text}")
-
         if message_text.strip():
             try:
-                # Try to delete the original message from middleware chat
                 context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message.message_id)
             except Exception as e:
-                log_message(f"Failed to delete buy bot message in middleware: {e}")
+                print(f"Failed to delete Deluge-style message: {e}")
 
             try:
-                # Forward to main group
                 main_bot.send_message(
                     chat_id=GROUP_CHAT_ID,
                     text=message_text,
                     parse_mode=ParseMode.HTML
                 )
-                log_message("Forwarded buy bot notification to main group.")
+                print(f"Forwarded Deluge buy bot message: {message_text}")
             except Exception as e:
-                log_message(f"Failed to send buy bot notification to main group: {e}")
-        else:
-            log_message("Empty buy bot message detected, skipping.")
-
-def debug_command(update: Update, context: CallbackContext):
-    """Command to toggle debug mode"""
-    global DEBUG
-    DEBUG = not DEBUG
-    update.message.reply_text(f"Debug mode is now {'ON' if DEBUG else 'OFF'}")
-
-def status_command(update: Update, context: CallbackContext):
-    """Report bot status"""
-    update.message.reply_text(
-        f"Middleware Bot is running\n"
-        f"Debug mode: {'ON' if DEBUG else 'OFF'}\n"
-        f"Configured to forward to chat ID: {GROUP_CHAT_ID}"
-    )
+                print(f"Failed to forward Deluge-style message: {e}")
 
 def main():
     print("Starting middleware listener bot...")
     updater = Updater(MIDDLEWARE_BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
-    
-    # Add command handlers
-    dp.add_handler(CommandHandler("debug", debug_command))
-    dp.add_handler(CommandHandler("status", status_command))
-    
-    # Add message handlers
+
     dp.add_handler(MessageHandler(Filters.regex('^/say '), handle_say_command))
-    
-    # This should be the last handler as it will catch all messages
     dp.add_handler(MessageHandler(Filters.all, handle_all_messages))
 
     updater.start_polling()
-    print("Bot is now listening for messages...")
     updater.idle()
 
 if __name__ == '__main__':
