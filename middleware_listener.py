@@ -12,6 +12,8 @@ MIDDLEWARE_BOT_TOKEN = os.getenv("MIDDLEWARE_BOT_TOKEN")
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
 
+BUY_BOT_GIF = "media/deluge/arc_gif.mp4"
+
 # Separate instance of bot using the main group chat bot
 main_bot = Bot(token=BOT_TOKEN)
 
@@ -60,7 +62,7 @@ def handle_buy_command(update: Update, context: CallbackContext):
             print(f"Failed to delete /buy command: {e}")
 
         try:
-            with open("/media/deluge/arc_gif.mp4", "rb") as video:
+            with open(BUY_BOT_GIF, "rb") as video:
                 main_bot.send_video(
                     chat_id=GROUP_CHAT_ID,
                     video=video,
