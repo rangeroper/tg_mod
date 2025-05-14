@@ -31,7 +31,7 @@ async def handle_say_command(message):
 
             try:
                 # Forward message to the main group
-                await main_bot.send_message(
+                main_bot.send_message(
                     chat_id=GROUP_CHAT_ID,
                     text=say_message,
                     parse_mode=ParseMode.HTML
@@ -56,7 +56,7 @@ async def handle_buy_bot_notifications(message):
 
             try:
                 # Forward buy bot message to the main group
-                await main_bot.send_message(
+                main_bot.send_message(
                     chat_id=GROUP_CHAT_ID,
                     text=message_text,
                     parse_mode=ParseMode.HTML
