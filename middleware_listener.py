@@ -87,6 +87,7 @@ def handle_say_command(update: Update, context: CallbackContext):
 def handle_all_messages(update: Update, context: CallbackContext):
     message = update.message or update.channel_post
     if not message:
+        print(f"not a message: {e}")
         return
 
     if is_deluge_buy_bot_message(message):
