@@ -431,7 +431,7 @@ def check_message(update: Update, context: CallbackContext):
     
     if re.search(r'(?<!\w)/?growth(?!\w)', message_text):
         try:
-            with open("filters/last_weekly_metrics_message.json", "r", encoding="utf-8") as f:
+            with open("filters/growth.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
             response_text = data.get("last_weekly_metrics_message", "⚠️ Weekly metrics message is missing or invalid.")
             message.reply_text(response_text)
