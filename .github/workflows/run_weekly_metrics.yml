@@ -1,31 +1,20 @@
-name: Run Metrics Bot and Sync Branches
+name: Run Weekly Metrics and Sync Branches
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # Every day at midnight UTC
+    - cron: "0 3 * * 1"  # Every Monday at 3 AM UTC
   workflow_dispatch:
 
 jobs:
-  run-metrics-bot:
+  run-weekly-metrics:
     runs-on: ubuntu-latest
-    env:
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      GROUP_CHAT_ID: ${{ secrets.GROUP_CHAT_ID }}
-      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-      DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
-      REPO: ${{ secrets.REPO }}
-      HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
-      TOKEN_ADDRESS: ${{ secrets.TOKEN_ADDRESS }}
 
     steps:
-      - name: Checkout repo (fetch all branches)
+      - name: Checkout repo (all branches)
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-
-      - name: Fetch all branches
-        run: git fetch --all
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -35,16 +24,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install Playwright browsers
-        run: playwright install
-
       - name: Checkout staging branch
         run: |
           git checkout staging
           git pull origin staging --rebase
 
-      - name: Run metrics bot script
-        run: python metrics/daily/metrics_bot.py
+      - name: Run weekly metrics summary
+        run: python metrics/weekly/metrics.py
 
       - name: Configure Git
         run: |
@@ -55,7 +41,7 @@ jobs:
         run: |
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "Update metrics on staging"
+            git commit -m "Update weekly metrics"
             git push origin staging
           else
             echo "No changes to commit on staging."
@@ -76,4 +62,3 @@ jobs:
 
       - name: Push changes to main
         run: git push origin main
-

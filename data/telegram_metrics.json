@@ -1,10 +1,30 @@
 {
   "dataset_name": "telegram_metrics",
-  "created_at": "2025-05-18T09:12:14.546925+00:00",
+  "created_at": "2025-05-18T18:51:17.499417+00:00",
   "entries": [
     {
       "id": "ad84f4cf-ce57-41c9-97dc-3d30f29ab5b9",
       "timestamp": "2025-05-18T09:12:14.546921+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "d92ad482-425c-45e1-b5d0-85f2fe007f1e",
+      "timestamp": "2025-05-18T18:45:23.404916+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "e7352c8a-6bfe-47b7-914a-efbd3e2351a1",
+      "timestamp": "2025-05-18T18:46:59.768450+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "2a23bcdf-0861-49d7-9931-c4a7336bffd4",
+      "timestamp": "2025-05-18T18:48:06.846394+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "853e5245-d72f-4a44-9ed1-9a79de8e0047",
+      "timestamp": "2025-05-18T18:51:17.499417+00:00",
       "member_count": 4
     }
   ]

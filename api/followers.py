@@ -39,18 +39,32 @@ async def scrape_x_profile(url: str) -> dict:
 def save_followers_count(count):
     os.makedirs("data", exist_ok=True)
     now_iso = datetime.utcnow().isoformat() + "Z"
-
-    data = {
-        "dataset_name": "x_followers_metrics",
-        "created_at": now_iso,
-        "entries": [
-            {
-                "id": str(uuid.uuid4()),
-                "timestamp": now_iso,
-                "followers": count
-            }
-        ]
+    new_entry = {
+        "id": str(uuid.uuid4()),
+        "timestamp": now_iso,
+        "followers": count
     }
+
+    if os.path.exists(X_METRICS_FILE):
+        with open(X_METRICS_FILE, "r") as f:
+            try:
+                data = json.load(f)
+                if "entries" not in data:
+                    data["entries"] = []
+            except json.JSONDecodeError:
+                data = {
+                    "dataset_name": "x_followers_metrics",
+                    "created_at": now_iso,
+                    "entries": []
+                }
+    else:
+        data = {
+            "dataset_name": "x_followers_metrics",
+            "created_at": now_iso,
+            "entries": []
+        }
+
+    data["entries"].append(new_entry)
 
     with open(X_METRICS_FILE, "w") as f:
         json.dump(data, f, indent=2)

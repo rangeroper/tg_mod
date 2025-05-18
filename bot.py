@@ -428,6 +428,16 @@ def check_message(update: Update, context: CallbackContext):
         except Exception as e:
             message.reply_text(f"⚠️ Error reading metrics: {e}")
         return
+    
+    if re.search(r'(?<!\w)/?growth(?!\w)', message_text):
+        try:
+            with open("filters/last_weekly_metrics_message.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            response_text = data.get("last_weekly_metrics_message", "⚠️ Weekly metrics message is missing or invalid.")
+            message.reply_text(response_text)
+        except Exception as e:
+            message.reply_text(f"⚠️ Error reading weekly metrics: {e}")
+        return
 
 def main():
     print("starting bot")

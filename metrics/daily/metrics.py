@@ -1,7 +1,13 @@
+import sys
+from pathlib import Path
 import os
 import json
 import asyncio
 from dotenv import load_dotenv
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.append(str(PROJECT_ROOT))
+
 from telegram import Bot
 from api.telegram import get_telegram_stats
 from api.holders import get_token_stats
@@ -18,14 +24,21 @@ bot = Bot(token=BOT_TOKEN)
 def send_update_to_tg(messages):
     """Sends a combined update message to the Telegram group."""
     full_message = "\n\n".join(messages)
-    bot.send_message(chat_id=CHAT_ID, text=full_message)
+    try:
+        bot.send_message(chat_id=CHAT_ID, text=full_message)
+    except Exception as e:
+        print(f"Failed to send message to Telegram: {e}")
     return full_message
 
 def save_last_metrics_message_as_filter(message):
     """Save the last sent message to /filters/metrics.json, overwriting previous content."""
-    os.makedirs("filters", exist_ok=True)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    filters_dir = os.path.join(project_root, "filters")
+    os.makedirs(filters_dir, exist_ok=True)
+
     data = {"last_metrics_message": message}
-    with open("filters/metrics.json", "w", encoding="utf-8") as f:
+    metrics_path = os.path.join(filters_dir, "metrics.json")
+    with open(metrics_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
 async def main():
