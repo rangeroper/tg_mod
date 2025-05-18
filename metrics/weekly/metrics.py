@@ -32,8 +32,8 @@ def format_metrics_message(metrics_data):
 
     dataset_keys = {
         "github_metrics_weekly_metrics": ["stars", "forks"],
-        "telegram_metrics_weekly_metrics": ["members"],
-        "token_holders_weekly_metrics": ["holders"],
+        "telegram_metrics_weekly_metrics": ["member_count"],
+        "token_holders_weekly_metrics": ["holder_count"],
         "x_metrics_weekly_metrics": ["followers"],
     }
 
@@ -69,7 +69,7 @@ def format_metrics_message(metrics_data):
 
 def save_last_weekly_metrics_message(message):
     data = {"last_weekly_metrics_message": message}
-    metrics_path = FILTERS_DIR / "last_weekly_metrics_message.json"
+    metrics_path = FILTERS_DIR / "growth.json"
     with open(metrics_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
     print(f"[✓] Saved last weekly metrics message to {metrics_path}")
