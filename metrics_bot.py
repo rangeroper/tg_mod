@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from telegram import Bot
 from api.telegram import get_telegram_stats
 from api.holders import get_token_stats
+from api.github import get_github_stats
 
-# from api.github import get_github_stats
 # from api.followers import get_x_followers_stats
 
 load_dotenv()
@@ -53,7 +53,7 @@ def main():
     telegram_message = get_telegram_stats()
         
     # GitHub Metrics
-    # github_stats = get_github_stats()
+    github_stats = get_github_stats()
 
     # Holders Metrics
     token_stats = get_token_stats()
@@ -63,7 +63,7 @@ def main():
 
     # Create a list of messages
     messages = [
-        # github_stats,
+        github_stats,
         telegram_message,
         token_stats,
         # x_followers_stats
