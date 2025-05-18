@@ -35,6 +35,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Checkout staging branch
+        run: |
+          git checkout staging
+          git pull origin staging --rebase
+
       - name: Run metrics bot script
         run: python metrics_bot.py
 
@@ -42,9 +47,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Checkout staging branch
-        run: git checkout staging
 
       - name: Commit and push changes to staging
         run: |
@@ -61,12 +63,11 @@ jobs:
           git checkout main
           git pull origin main --rebase
 
-      - name: Cherry-pick staging commit(s) to main
+      - name: Merge staging into main
         run: |
-          LATEST_COMMIT=$(git rev-parse staging)
-          git cherry-pick $LATEST_COMMIT || {
-            echo "Cherry-pick failed, aborting."
-            git cherry-pick --abort
+          git merge staging --no-edit || {
+            echo "Merge failed, aborting."
+            git merge --abort
             exit 1
           }
 
