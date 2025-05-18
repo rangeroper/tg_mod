@@ -37,13 +37,16 @@ def format_metrics_message(metrics_data):
         "x_follower_weekly_metrics": ["followers"],
     }
 
-    for dataset_name, data in metrics_data.items():
+    for dataset_name, keys_to_show in dataset_keys.items():
+        data = metrics_data.get(dataset_name)
+        if not data:
+            continue
+
         current = data.get("current", {})
         change = data.get("change", {})
         if not current:
             continue
 
-        keys_to_show = dataset_keys.get(dataset_name, list(current.keys()))
         for key in keys_to_show:
             if key not in current:
                 continue
@@ -54,7 +57,6 @@ def format_metrics_message(metrics_data):
             if not isinstance(pct_change, (int, float)):
                 pct_change = None
 
-            # Since dataset_name matches the file name, no suffix stripping
             label_key = f"{dataset_name}_{key}"
             label = EMOJI_MAP.get(label_key, f"{dataset_name.replace('_', ' ').title()} {key.title()}")
 
@@ -62,7 +64,9 @@ def format_metrics_message(metrics_data):
             change_str = f" ({pct_change:+.2f}%)" if pct_change is not None else ""
             lines.append(f"{label} >> {value_str}{change_str}")
 
-    return "\n".join(lines) + "\n"
+        lines.append("")  # Line break between groups
+
+    return "\n".join(lines).strip() + "\n"
 
 def save_last_weekly_metrics_message(message):
     data = {"last_weekly_metrics_message": message}
