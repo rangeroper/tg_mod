@@ -1,9 +1,13 @@
 {
   "dataset_name": "telegram_metrics",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "created_at": "2025-05-18T06:52:32.665071+00:00",
 =======
   "created_at": "2025-05-18T07:03:14.678022+00:00",
+>>>>>>> staging
+=======
+  "created_at": "2025-05-18T07:13:49.058662+00:00",
 >>>>>>> staging
   "entries": [
     {
@@ -44,6 +48,16 @@
       "id": "c1c54137-3918-4b15-8ce2-238d7327fb01",
       "timestamp": "2025-05-18T07:03:14.678001+00:00",
 >>>>>>> staging
+      "member_count": 4
+    },
+    {
+      "id": "b3d46ecd-473a-4836-9ca3-401f9e8b08fc",
+      "timestamp": "2025-05-18T07:12:31.002314+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "a2d12179-c51f-46d6-af75-d6d575f6c450",
+      "timestamp": "2025-05-18T07:13:49.058641+00:00",
       "member_count": 4
     }
   ]
