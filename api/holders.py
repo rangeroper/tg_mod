@@ -10,7 +10,7 @@ load_dotenv()
 TOKEN_MINT_ADDRESS = os.getenv("TOKEN_ADDRESS")
 HELIUS_API_KEY = os.getenv("HELIUS_API_KEY")
 
-DATA_FILE = "data/token_holders.json"
+DATA_FILE = "data/metrics/daily/token_holder_metrics.json"
 
 def load_data():
     if os.path.exists(DATA_FILE):
@@ -19,7 +19,7 @@ def load_data():
                 data = json.load(f)
                 if "entries" not in data:
                     data = {
-                        "dataset_name": "token_holders",
+                        "dataset_name": "token_holder_metrics",
                         "created_at": datetime.now(timezone.utc).isoformat(),
                         "entries": []
                     }
@@ -27,7 +27,7 @@ def load_data():
         except json.JSONDecodeError:
             pass
     return {
-        "dataset_name": "token_holders",
+        "dataset_name": "token_holder_metrics",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "entries": []
     }

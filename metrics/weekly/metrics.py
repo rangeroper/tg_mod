@@ -8,20 +8,20 @@ FILTERS_DIR = PROJECT_ROOT / "filters"
 FILTERS_DIR.mkdir(parents=True, exist_ok=True)
 
 EMOJI_MAP = {
-    "github_metrics_weekly_metrics": "⭐️ Github Stars",
-    "github_forks": "🍴 Github Forks",
-    "telegram_metrics_weekly_metrics": "👥 Telegram Members",
-    "token_holders_weekly_metrics": "💊 $ARC Holders",
-    "x_metrics_weekly_metrics": "🐦 X Followers",
+    "github_weekly_metrics_stars": "⭐️ GitHub Stars",
+    "github_weekly_metrics_forks": "🍴 GitHub Forks",
+    "telegram_weekly_metrics_member_count": "👥 Telegram Members",
+    "token_holder_weekly_metrics_holder_count": "💊 $ARC Holders",
+    "x_follower_weekly_metrics_followers": "🐦 X Followers",
 }
 
 def load_weekly_metrics_files():
-    # Load all weekly metrics JSON files from WEEKLY_DIR
     results = {}
     for file_path in WEEKLY_DIR.glob("*_weekly_metrics.json"):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
+                # Use filename stem as dataset name, matches your naming scheme
                 results[file_path.stem] = data
         except Exception as e:
             print(f"[!] Failed to load {file_path.name}: {e}")
@@ -31,10 +31,10 @@ def format_metrics_message(metrics_data):
     lines = []
 
     dataset_keys = {
-        "github_metrics_weekly_metrics": ["stars", "forks"],
-        "telegram_metrics_weekly_metrics": ["member_count"],
-        "token_holders_weekly_metrics": ["holder_count"],
-        "x_metrics_weekly_metrics": ["followers"],
+        "github_weekly_metrics": ["stars", "forks"],
+        "telegram_weekly_metrics": ["member_count"],
+        "token_holder_weekly_metrics": ["holder_count"],
+        "x_follower_weekly_metrics": ["followers"],
     }
 
     for dataset_name, data in metrics_data.items():
@@ -42,11 +42,6 @@ def format_metrics_message(metrics_data):
         change = data.get("change", {})
         if not current:
             continue
-
-        label = EMOJI_MAP.get(
-            dataset_name,
-            dataset_name.replace("_weekly_metrics", "").replace("_", " ").title()
-        )
 
         keys_to_show = dataset_keys.get(dataset_name, list(current.keys()))
         for key in keys_to_show:
@@ -59,13 +54,15 @@ def format_metrics_message(metrics_data):
             if not isinstance(pct_change, (int, float)):
                 pct_change = None
 
+            # Since dataset_name matches the file name, no suffix stripping
+            label_key = f"{dataset_name}_{key}"
+            label = EMOJI_MAP.get(label_key, f"{dataset_name.replace('_', ' ').title()} {key.title()}")
+
             value_str = f"{value:,}"
-
             change_str = f" ({pct_change:+.2f}%)" if pct_change is not None else ""
-            line = f"{label} {key.title()} >> {value_str}{change_str}"
-            lines.append(line)
+            lines.append(f"{label} >> {value_str}{change_str}")
 
-    return "\n".join(lines) + "\n" 
+    return "\n".join(lines) + "\n"
 
 def save_last_weekly_metrics_message(message):
     data = {"last_weekly_metrics_message": message}

@@ -1,5 +1,5 @@
 {
-  "dataset_name": "x_followers_metrics",
+  "dataset_name": "x_follower_metrics",
   "created_at": "2025-05-18T18:48:56.337126Z",
   "entries": [
     {
@@ -11,6 +11,16 @@
       "id": "07271c51-8538-451e-ae27-cd0e34d62206",
       "timestamp": "2025-05-18T18:51:59.695386Z",
       "followers": 50532
+    },
+    {
+      "id": "1ce38992-65cd-4a7e-9cb9-cc24dab1b649",
+      "timestamp": "2025-05-18T20:23:46.285739Z",
+      "followers": 50527
+    },
+    {
+      "id": "d77c3e68-80c0-4023-8d4e-cebd25f7bd0c",
+      "timestamp": "2025-05-18T20:26:34.946099Z",
+      "followers": 50527
     }
   ]
 }

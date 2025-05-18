@@ -5,7 +5,7 @@ from datetime import datetime
 import asyncio
 from playwright.async_api import async_playwright
 
-X_METRICS_FILE = "data/x_metrics.json"
+X_METRICS_FILE = "data/metrics/daily/x_follower_metrics.json"
 X_PROFILE_URL = "https://x.com/arcdotfun"
 
 async def scrape_x_profile(url: str) -> dict:
@@ -53,13 +53,13 @@ def save_followers_count(count):
                     data["entries"] = []
             except json.JSONDecodeError:
                 data = {
-                    "dataset_name": "x_followers_metrics",
+                    "dataset_name": "x_follower_metrics",
                     "created_at": now_iso,
                     "entries": []
                 }
     else:
         data = {
-            "dataset_name": "x_followers_metrics",
+            "dataset_name": "x_follower_metrics",
             "created_at": now_iso,
             "entries": []
         }

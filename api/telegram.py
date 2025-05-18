@@ -11,8 +11,7 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GROUP_CHAT_ID = os.getenv("GROUP_CHAT_ID")
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
-DATA_FILE = "data/telegram_metrics.json"
-
+DATA_FILE = "data/metrics/daily/telegram_metrics.json"
 
 def load_data():
     """Load the full dataset, return dict with dataset_name, created_at, entries"""

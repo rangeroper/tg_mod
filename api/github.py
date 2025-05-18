@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GITHUB_METRICS_FILE = "data/github_metrics.json"
+GITHUB_METRICS_FILE = "data/metrics/daily/github_metrics.json"
 
 def get_github_stats():
     """Fetches GitHub repository statistics and appends to metrics file."""
