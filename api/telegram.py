@@ -1,56 +1,79 @@
 import os
 import json
+import uuid
+from datetime import datetime, timezone
+from dotenv import load_dotenv
 from telegram import Bot
+
+load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GROUP_CHAT_ID = os.getenv("GROUP_CHAT_ID")
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
+DATA_FILE = "data/telegram_metrics.json"
 
-async def get_telegram_stats():
-    """Fetches Telegram group statistics and computes percentage increases."""
-    # Load previous stats
-    previous_count = load_previous_count()
-    
+
+def load_data():
+    """Load the full dataset, return dict with dataset_name, created_at, entries"""
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            try:
+                data = json.load(f)
+                # Ensure keys exist for backward compatibility
+                if "entries" not in data:
+                    data = {
+                        "dataset_name": "telegram_metrics",
+                        "created_at": datetime.now(timezone.utc).isoformat(),
+                        "entries": []
+                    }
+                return data
+            except json.JSONDecodeError:
+                pass
+    # Return default structure if no file or error
+    return {
+        "dataset_name": "telegram_metrics",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "entries": []
+    }
+
+
+def save_data(data):
+    """Save the full dataset, update created_at timestamp"""
+    data["created_at"] = datetime.now(timezone.utc).isoformat()
+    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+def log_member_count(count):
+    """Append a new member count entry with id and timestamp"""
+    data = load_data()
+    new_entry = {
+        "id": str(uuid.uuid4()),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "member_count": count
+    }
+    data["entries"].append(new_entry)
+    save_data(data)
+    return new_entry
+
+
+def get_latest_member_count():
+    """Return the last recorded member count, or 0 if none."""
+    data = load_data()
+    if data["entries"]:
+        return data["entries"][-1]["member_count"]
+    return 0
+
+
+def get_telegram_stats():
+    """Fetch current member count, log it, and return formatted message."""
     try:
-        # Get current member count
-        current_count = await bot.get_chat_member_count(GROUP_CHAT_ID)
-        
-        # Calculate increase and percentage change
-        if previous_count == 0:
-            increase = current_count
-            percent_change = 100 if current_count > 0 else 0
-        else:
-            increase = current_count - previous_count
-            percent_change = (increase / previous_count * 100) if previous_count else 0
-        
-        # Save the current count for future comparisons
-        save_current_count(current_count)
-        
-        # Format current_count with commas
+        current_count = bot.get_chat_member_count(GROUP_CHAT_ID)
+        log_member_count(current_count)
         formatted_count = "{:,}".format(current_count)
-        
-        # Format the stats into a message
-        message = f"👥 Telegram Members  >>  {formatted_count} ({percent_change:.2f}%)"
-        
-        return message
+        return f"👥 Telegram Members  >>  {formatted_count}"
     except Exception as e:
         print(f"Error fetching Telegram stats: {e}")
         return "❌ Error fetching Telegram member count."
-
-def load_previous_count():
-    """Loads previous count from file or returns 0 if the file is missing or invalid."""
-    if os.path.exists("data/telegram_metrics.json"):
-        with open("data/telegram_metrics.json", "r") as f:
-            try:
-                data = json.load(f)
-                return data.get("count", 0)
-            except json.JSONDecodeError:
-                return 0
-    else:
-        return 0
-
-def save_current_count(count):
-    """Saves the current count to file, creating the file if it doesn't exist."""
-    with open("data/telegram_metrics.json", "w") as f:
-        json.dump({"count": count}, f)
