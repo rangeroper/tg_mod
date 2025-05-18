@@ -1,6 +1,7 @@
 # metrics_bot.py
 import os
 import json
+import subprocess
 from dotenv import load_dotenv
 from telegram import Bot
 from api.telegram import get_telegram_stats
@@ -30,6 +31,23 @@ def save_last_metrics_message_as_filter(message):
     with open("filters/metrics.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
+def commit_metrics_changes():
+    # Check for changes
+    status = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True)
+    if status.stdout.strip():
+        print("Git status shows changes, committing now...")
+        
+        add_result = subprocess.run(['git', 'add', '.'], capture_output=True, text=True)
+        print(f"git add output:\n{add_result.stdout}\n{add_result.stderr}")
+        
+        commit_result = subprocess.run(['git', 'commit', '-m', 'Automated metrics update'], capture_output=True, text=True)
+        print(f"git commit output:\n{commit_result.stdout}\n{commit_result.stderr}")
+        
+        push_result = subprocess.run(['git', 'push'], capture_output=True, text=True)
+        print(f"git push output:\n{push_result.stdout}\n{push_result.stderr}")
+    else:
+        print("No changes to commit.")
+
 def main():
     # Telegram Metrics
     telegram_message = get_telegram_stats()
@@ -54,6 +72,7 @@ def main():
     # Send all metrics together in one message
     full_message = send_update_to_tg(messages)
     save_last_metrics_message_as_filter(full_message)
+    commit_metrics_changes()
 
 if __name__ == "__main__":
     main()
