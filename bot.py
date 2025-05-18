@@ -19,6 +19,9 @@ GROUP_CHAT_ID = os.getenv('GROUP_CHAT_ID')
 # File path for filters
 FILTERS_FILE = "filters/filters.json"
 
+# File path for metrics
+METRICS_FILE = "filters/metrics.json"
+
 # File path for accompanying filter media
 MEDIA_FOLDER = "media"
 
@@ -120,6 +123,13 @@ def load_filters(file_path):
         return json.load(file)
 
 FILTERS = load_filters(FILTERS_FILE)
+
+# Load metrics 
+def load_metrics(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return json.load(file)
+
+METRICS = load_metrics(METRICS_FILE)
 
 # Load blocklist/whitelisted words/phrases from files
 def load_phrases(file_path):
@@ -390,17 +400,6 @@ def check_message(update: Update, context: CallbackContext):
         pattern = rf'(?<!\w)/?{re.escape(normalized_trigger)}(_\w+)?(?!\w)'
         
         if re.search(pattern, message_text):
-
-            if normalized_trigger == "metrics":
-                try:
-                    with open("filters/metrics.json", "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                    response_text = data.get("last_metrics_message", "⚠️ Metrics message is missing or invalid.")
-                    message.reply_text(response_text)
-                except Exception as e:
-                    message.reply_text(f"⚠️ Error reading metrics: {e}")
-                return
-        
             response_text = filter_data.get("response_text", "")
             media_file = filter_data.get("media")
             media_type = filter_data.get("type", "gif").lower()
@@ -420,6 +419,16 @@ def check_message(update: Update, context: CallbackContext):
             elif response_text:
                 message.reply_text(response_text)
             return  # Respond only once
+        
+    if re.search(r'(?<!\w)/?metrics(?!\w)', message_text):
+        try:
+            with open("filters/metrics.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            response_text = data.get("last_metrics_message", "⚠️ Metrics message is missing or invalid.")
+            message.reply_text(response_text)
+        except Exception as e:
+            message.reply_text(f"⚠️ Error reading metrics: {e}")
+        return
 
 def main():
     print("starting bot")
