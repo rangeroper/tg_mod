@@ -1,6 +1,10 @@
 {
   "dataset_name": "token_holders",
+<<<<<<< HEAD
   "created_at": "2025-05-18T06:52:56.774610+00:00",
+=======
+  "created_at": "2025-05-18T07:03:43.611016+00:00",
+>>>>>>> staging
   "entries": [
     {
       "id": "dac32157-1cc8-40d3-b06d-17626b8bb156",
@@ -28,6 +32,7 @@
       "holder_count": 53568
     },
     {
+<<<<<<< HEAD
       "id": "d709f618-1fc6-4909-ad9d-663be183f7e9",
       "timestamp": "2025-05-18T06:44:57.894904+00:00",
       "holder_count": 53570
@@ -36,6 +41,11 @@
       "id": "d82c14bd-84a0-4319-89be-5a0debd0c5d3",
       "timestamp": "2025-05-18T06:52:56.774597+00:00",
       "holder_count": 53569
+=======
+      "id": "540bbde3-74f9-4592-874a-43e735d6a466",
+      "timestamp": "2025-05-18T07:03:43.611007+00:00",
+      "holder_count": 53572
+>>>>>>> staging
     }
   ]
 }
