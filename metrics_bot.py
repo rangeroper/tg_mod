@@ -1,4 +1,3 @@
-# metrics_bot.py
 import os
 import json
 import subprocess
@@ -6,13 +5,12 @@ from dotenv import load_dotenv
 from telegram import Bot
 from api.telegram import get_telegram_stats
 from api.holders import get_token_stats
+from api.github import get_github_stats
 
-# from api.github import get_github_stats
 # from api.followers import get_x_followers_stats
 
 load_dotenv()
 
-# Initialize bot using Config
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHAT_ID = os.getenv("GROUP_CHAT_ID")
 
@@ -32,7 +30,6 @@ def save_last_metrics_message_as_filter(message):
         json.dump(data, f, indent=2)
 
 def commit_metrics_changes():
-    # Check for changes
     status = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True)
     if status.stdout.strip():
         print("Git status shows changes, committing now...")
@@ -53,7 +50,7 @@ def main():
     telegram_message = get_telegram_stats()
         
     # GitHub Metrics
-    # github_stats = get_github_stats()
+    github_stats = get_github_stats()
 
     # Holders Metrics
     token_stats = get_token_stats()
@@ -63,7 +60,7 @@ def main():
 
     # Create a list of messages
     messages = [
-        # github_stats,
+        github_stats,
         telegram_message,
         token_stats,
         # x_followers_stats

@@ -1,0 +1,13 @@
+{
+  "dataset_name": "github_metrics",
+  "created_at": "2025-05-18T08:20:40.856870+00:00",
+  "entries": [
+    {
+      "id": "b8e0d1da-f91f-4771-bd5a-ccc09fd226c2",
+      "timestamp": "2025-05-18T08:20:40.855869+00:00",
+      "stars": 3629,
+      "forks": 392,
+      "release_version": "rig-bedrock-v0.1.3"
+    }
+  ]
+}
