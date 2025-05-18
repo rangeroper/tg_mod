@@ -34,20 +34,10 @@ jobs:
 
       - name: Checkout and update staging branch
         run: |
-          git fetch --all
           git checkout staging
           git pull origin staging --rebase
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run metrics bot on staging
-        run: python metrics_bot.py
+      # Run your bot, install dependencies, etc.
 
       - name: Commit and push changes to staging
         run: |
@@ -59,20 +49,21 @@ jobs:
             echo "No changes to commit on staging."
           fi
 
-      - name: Checkout and update main branch
+      - name: Checkout main branch
         run: |
-          git fetch --all
           git checkout main
           git pull origin main --rebase
 
-      - name: Merge staging into main
+      - name: Cherry-pick staging commit(s) to main
         run: |
-          git merge origin/staging --no-edit --allow-unrelated-histories
+          # Find last commit hash on staging branch (you just pushed)
+          LATEST_COMMIT=$(git rev-parse staging)
+          git cherry-pick $LATEST_COMMIT || {
+            echo "Cherry-pick failed, aborting."
+            git cherry-pick --abort
+            exit 1
+          }
 
-      - name: Push merged changes to main
-        run: |
-          if ! git diff --cached --quiet; then
-            git push origin main
-          else
-            echo "No changes to push on main."
-          fi
+      - name: Push changes to main
+        run: git push origin main
+
