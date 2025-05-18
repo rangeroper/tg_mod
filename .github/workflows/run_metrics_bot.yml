@@ -1,0 +1,74 @@
+name: Run Metrics Bot and Sync Branches
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # Every 5 minutes UTC
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+  run-metrics-bot:
+    runs-on: ubuntu-latest
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      GROUP_CHAT_ID: ${{ secrets.GROUP_CHAT_ID }}
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+      DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+      REPO: ${{ secrets.REPO }}
+      HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
+      TOKEN_ADDRESS: ${{ secrets.TOKEN_ADDRESS }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Checkout and update staging branch
+        run: |
+          git fetch origin
+          git checkout staging
+          git reset --hard origin/staging
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run metrics bot on staging
+        run: python metrics_bot.py
+
+      - name: Commit and push changes to staging
+        run: |
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "Update metrics on staging"
+            git push origin staging
+          else
+            echo "No changes to commit on staging."
+          fi
+
+      - name: Checkout and update main branch
+        run: |
+          git fetch origin
+          git checkout main
+          git reset --hard origin/main
+
+      - name: Merge staging into main
+        run: |
+          git merge origin/staging --no-edit
+
+      - name: Push merged changes to main
+        run: |
+          git push origin main
