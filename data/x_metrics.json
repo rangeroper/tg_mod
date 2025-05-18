@@ -1,0 +1,11 @@
+{
+  "dataset_name": "x_followers_metrics",
+  "created_at": "2025-05-18T08:56:02.401367Z",
+  "entries": [
+    {
+      "id": "5b8c9457-f2e3-44e4-aec7-a0e691216691",
+      "timestamp": "2025-05-18T08:56:02.401367Z",
+      "followers": 50509
+    }
+  ]
+}

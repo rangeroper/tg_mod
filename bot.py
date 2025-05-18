@@ -1,7 +1,6 @@
 import os
 import re
 import json
-import subprocess
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, Filters

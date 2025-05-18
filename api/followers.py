@@ -1,13 +1,14 @@
 import os
 import json
+import uuid
+from datetime import datetime
 import asyncio
 from playwright.async_api import async_playwright
 
-# File path to store follower data
 X_METRICS_FILE = "data/x_metrics.json"
+X_PROFILE_URL = "https://x.com/arcdotfun"
 
 async def scrape_x_profile(url: str) -> dict:
-    """Scrape an X.com profile to get user data."""
     xhr_calls = []
 
     def intercept_response(response):
@@ -26,64 +27,58 @@ async def scrape_x_profile(url: str) -> dict:
         page.on("response", intercept_response)
         await page.goto(url)
         await page.wait_for_selector("[data-testid='primaryColumn']")
-        
         await page.wait_for_timeout(3000)
 
-        # Extract user metrics
-        tweet_calls = [f for f in xhr_calls if "UserBy" in f.url]
-        for xhr in tweet_calls:
+        user_calls = [r for r in xhr_calls if "UserBy" in r.url]
+        for xhr in user_calls:
             data = await xhr.json()
-            return data['data']['user']['result']
-    
+            return data.get('data', {}).get('user', {}).get('result', None)
+
     return None
 
-def load_previous_followers():
-    """Loads the previous follower count from a file."""
-    if os.path.exists(X_METRICS_FILE):
-        with open(X_METRICS_FILE, "r") as f:
-            try:
-                data = json.load(f)
-                return data.get("followers", 0)
-            except json.JSONDecodeError:
-                return 0
-    return 0
-
 def save_followers_count(count):
-    """Saves the current follower count to a file."""
     os.makedirs("data", exist_ok=True)
-    stats = {"followers": {"current": count}}
+    now_iso = datetime.utcnow().isoformat() + "Z"
+
+    data = {
+        "dataset_name": "x_followers_metrics",
+        "created_at": now_iso,
+        "entries": [
+            {
+                "id": str(uuid.uuid4()),
+                "timestamp": now_iso,
+                "followers": count
+            }
+        ]
+    }
+
     with open(X_METRICS_FILE, "w") as f:
-        json.dump(stats, f)
+        json.dump(data, f, indent=2)
 
 async def get_x_followers_stats():
-    """Fetches current followers, calculates the increase, and formats the message."""
-    previous_count = load_previous_followers()
-    profile = await scrape_x_profile("https://x.com/arcdotfun")
-    
+    profile = await scrape_x_profile(X_PROFILE_URL)
+
     if profile and 'legacy' in profile and 'followers_count' in profile['legacy']:
         current_count = profile['legacy']['followers_count']
     else:
         current_count = 0
 
-    # Calculate increase and percentage change
-    increase = current_count - previous_count
-    percent_change = (increase / previous_count * 100) if previous_count else (100 if current_count > 0 else 0)
-
-    # Save the new count
     save_followers_count(current_count)
+    formatted_count = f"{current_count:,}"
+    message = f"🐦 X Followers  >>  {formatted_count}"
 
-    # Format count with commas
-    formatted_count = "{:,}".format(current_count)
-
-    # Generate formatted message
-    message = f"🐦 X Followers  >>  {formatted_count} ({percent_change:.2f}%)"
-    
-    return message
+    return {
+        "id": str(uuid.uuid4()),
+        "service": "x_followers",
+        "data": {
+            "followers": current_count,
+            "message": message,
+        }
+    }
 
 def fetch_x_followers():
-    """Runs the async function and returns the formatted message."""
     return asyncio.get_event_loop().run_until_complete(get_x_followers_stats())
 
 if __name__ == "__main__":
-    # Fetch and print X followers count
-    print(fetch_x_followers())
+    result = fetch_x_followers()
+    print(result["data"]["message"])
