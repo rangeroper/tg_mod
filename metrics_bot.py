@@ -1,4 +1,3 @@
-# metrics_bot.py
 import os
 import json
 import subprocess
@@ -12,7 +11,6 @@ from api.github import get_github_stats
 
 load_dotenv()
 
-# Initialize bot using Config
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHAT_ID = os.getenv("GROUP_CHAT_ID")
 
@@ -32,7 +30,6 @@ def save_last_metrics_message_as_filter(message):
         json.dump(data, f, indent=2)
 
 def commit_metrics_changes():
-    # Check for changes
     status = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True)
     if status.stdout.strip():
         print("Git status shows changes, committing now...")

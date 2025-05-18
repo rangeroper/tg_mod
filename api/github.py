@@ -1,6 +1,6 @@
 import os
 import json
-import aiohttp
+import requests
 import uuid
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -11,9 +11,9 @@ GITHUB_METRICS_FILE = "data/github_metrics.json"
 
 def get_github_stats():
     """Fetches GitHub repository statistics and appends to metrics file."""
-    repo = os.getenv("GITHUB_REPO")
+    repo = os.getenv("REPO")
     if not repo:
-        return "❌ GITHUB_REPO not set in environment."
+        return "❌ REPO not set in environment."
 
     url = f"https://api.github.com/repos/{repo}"
     response = requests.get(url)
