@@ -34,9 +34,9 @@ jobs:
 
       - name: Checkout and update staging branch
         run: |
-          git fetch origin
+          git fetch --all
           git checkout staging
-          git reset --hard origin/staging
+          git pull origin staging --rebase
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -61,14 +61,18 @@ jobs:
 
       - name: Checkout and update main branch
         run: |
-          git fetch origin
+          git fetch --all
           git checkout main
-          git reset --hard origin/main
+          git pull origin main --rebase
 
       - name: Merge staging into main
         run: |
-          git merge origin/staging --no-edit
+          git merge origin/staging --no-edit --allow-unrelated-histories
 
       - name: Push merged changes to main
         run: |
-          git push origin main
+          if ! git diff --cached --quiet; then
+            git push origin main
+          else
+            echo "No changes to push on main."
+          fi
