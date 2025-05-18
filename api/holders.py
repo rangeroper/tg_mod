@@ -1,16 +1,48 @@
-import json
 import os
-import aiohttp
+import json
+import uuid
+import requests
+from datetime import datetime, timezone
+from dotenv import load_dotenv
 
-# Fetch system environment variables
+load_dotenv()
+
 TOKEN_MINT_ADDRESS = os.getenv("TOKEN_ADDRESS")
 HELIUS_API_KEY = os.getenv("HELIUS_API_KEY")
 
-async def get_token_holders():
-    """Fetches the total token holder count using Helius getTokenAccounts API asynchronously."""
-    
+DATA_FILE = "data/token_holders.json"
+
+def load_data():
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r") as f:
+                data = json.load(f)
+                if "entries" not in data:
+                    data = {
+                        "dataset_name": "token_holders",
+                        "created_at": datetime.now(timezone.utc).isoformat(),
+                        "entries": []
+                    }
+                return data
+        except json.JSONDecodeError:
+            pass
+    return {
+        "dataset_name": "token_holders",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "entries": []
+    }
+
+def save_data(data):
+    data["created_at"] = datetime.now(timezone.utc).isoformat()
+    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+import time
+
+def fetch_token_holders(max_retries=5, backoff_factor=2):
     url = f"https://mainnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
-    
+
     payload = {
         "jsonrpc": "2.0",
         "id": "get-holders",
@@ -23,80 +55,69 @@ async def get_token_holders():
             }
         }
     }
-    
+
     headers = {"Content-Type": "application/json"}
-    
+
     unique_holders = set()
     has_more = True
     cursor = None
+    retries = 0
 
-    async with aiohttp.ClientSession() as session:
-        while has_more:
-            if cursor:
-                payload["params"]["cursor"] = cursor
-            
-            async with session.post(url, headers=headers, json=payload) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    
-                    if "error" in data:
-                        print(f"API Error: {data['error']['message']}")
-                        return 0
-                        
-                    if "result" in data and "token_accounts" in data["result"]:
-                        accounts = data["result"]["token_accounts"]
-                        
-                        for account in accounts:
-                            if "owner" in account:
-                                unique_holders.add(account["owner"])
-                        
-                        if "cursor" in data["result"] and data["result"]["cursor"]:
-                            cursor = data["result"]["cursor"]
-                        else:
-                            has_more = False
-                    else:
-                        has_more = False
-                else:
-                    print(f"Error fetching data: {response.status}")
-                    has_more = False
-    
-    holder_count = len(unique_holders)
-    return holder_count
+    while has_more:
+        if cursor:
+            payload["params"]["cursor"] = cursor
+        else:
+            payload["params"].pop("cursor", None)
 
-def load_previous_token_stats():
-    """Loads previous token holder count from file or returns 0 if not available."""
-    if os.path.exists("data/token_holders.json"):
-        with open("data/token_holders.json", "r") as f:
-            try:
-                data = json.load(f)
-                return data.get("holders", {}).get("current", 0)
-            except json.JSONDecodeError:
+        response = requests.post(url, headers=headers, json=payload)
+
+        if response.status_code == 200:
+            data = response.json()
+
+            if "error" in data:
+                print(f"API Error: {data['error']['message']}")
                 return 0
-    else:
-        return 0
 
-def save_current_token_stats(current_count):
-    """Saves the current token holder count to file."""
-    os.makedirs("data", exist_ok=True)
-    stats = {"holders": {"current": current_count}}
-    with open("data/token_holders.json", "w") as f:
-        json.dump(stats, f)
+            result = data.get("result", {})
+            accounts = result.get("token_accounts", [])
 
-async def get_token_stats():
-    """Fetches token stats asynchronously and returns a formatted message."""
-    previous_count = load_previous_token_stats()
-    current_count = await get_token_holders()  
-    
-    if previous_count == 0:
-        increase = current_count
-        percent_change = 100 if current_count > 0 else 0
-    else:
-        increase = current_count - previous_count
-        percent_change = (increase / previous_count * 100) if previous_count else 0
-    
-    save_current_token_stats(current_count)
-    
-    formatted_count = "{:,}".format(current_count)
-    
-    message = f"💊 $ARC Holders  >>  {formatted_count} ({percent_change:.2f}%)"
-    return message
+            for account in accounts:
+                owner = account.get("owner")
+                if owner:
+                    unique_holders.add(owner)
+
+            cursor = result.get("cursor")
+            has_more = bool(cursor)
+
+            retries = 0  # reset retries on successful response
+
+        elif response.status_code == 429:
+            retries += 1
+            if retries > max_retries:
+                print("Max retries reached due to rate limiting. Aborting.")
+                return len(unique_holders)
+            wait_time = backoff_factor ** retries
+            print(f"Rate limited (429). Waiting {wait_time} seconds before retry {retries}...")
+            time.sleep(wait_time)
+
+        else:
+            print(f"Error fetching data: HTTP {response.status_code}")
+            has_more = False
+
+    return len(unique_holders)
+
+def log_holder_count(count):
+    data = load_data()
+    new_entry = {
+        "id": str(uuid.uuid4()),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "holder_count": count
+    }
+    data["entries"].append(new_entry)
+    save_data(data)
+
+def get_token_stats():
+    count = fetch_token_holders()
+    log_holder_count(count)
+    formatted_count = "{:,}".format(count)
+    return f"💊 $ARC Holders  >>  {formatted_count}"

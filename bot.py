@@ -19,6 +19,9 @@ GROUP_CHAT_ID = os.getenv('GROUP_CHAT_ID')
 # File path for filters
 FILTERS_FILE = "filters/filters.json"
 
+# File path for metrics
+METRICS_FILE = "filters/metrics.json"
+
 # File path for accompanying filter media
 MEDIA_FOLDER = "media"
 
@@ -120,6 +123,13 @@ def load_filters(file_path):
         return json.load(file)
 
 FILTERS = load_filters(FILTERS_FILE)
+
+# Load metrics 
+def load_metrics(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return json.load(file)
+
+METRICS = load_metrics(METRICS_FILE)
 
 # Load blocklist/whitelisted words/phrases from files
 def load_phrases(file_path):
@@ -410,42 +420,15 @@ def check_message(update: Update, context: CallbackContext):
                 message.reply_text(response_text)
             return  # Respond only once
         
-# def check_middleware_message(update: Update, context: CallbackContext):
-#     message = update.message or update.channel_post
-#     if not message:
-#         print("No message or channel post detected in middleware group.")
-#         return
-
-#     chat_id = update.effective_chat.id
-#     message_text = message.text or ""
-
-#     # Ensure this handler only processes messages from the middleware group
-#     if chat_id != MIDDLEWARE_CHAT_ID:
-#         return  # Only listen to middleware group here
-
-#     # Check if the message starts with '/say'
-#     if message_text.lower().startswith('/say '):
-#         say_message = message_text[5:].strip()  # Remove "/say "
-        
-#         if say_message:
-#             try:
-#                 context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-#             except Exception as e:
-#                 print(f"Failed to delete /say command in middleware: {e}")
-
-#             try:
-#                 context.bot.send_message(
-#                     chat_id=GROUP_CHAT_ID,
-#                     text=say_message,
-#                     parse_mode=ParseMode.HTML
-#                 )
-#                 print(f"Relayed /say from middleware to main group: {say_message}")
-#             except Exception as e:
-#                 print(f"Failed to send message to main group: {e}")
-#         else:
-#             print("Empty /say command in middleware, skipping.")
-
-# This will be triggered whenever a message is received in the middleware group
+    if re.search(r'(?<!\w)/?metrics(?!\w)', message_text):
+        try:
+            with open("filters/metrics.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            response_text = data.get("last_metrics_message", "⚠️ Metrics message is missing or invalid.")
+            message.reply_text(response_text)
+        except Exception as e:
+            message.reply_text(f"⚠️ Error reading metrics: {e}")
+        return
 
 def main():
     print("starting bot")
