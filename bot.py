@@ -260,18 +260,6 @@ def list_filters(update: Update, context: CallbackContext):
     else:
         update.message.reply_text(response, parse_mode="Markdown")
 
-def metrics_handler(update: Update, context: CallbackContext):
-    try:
-        with open("filters/metrics.json", "r") as f:
-            data = json.load(f)
-
-        if isinstance(data, dict) and isinstance(data.get("message"), str):
-            update.message.reply_text(data["message"])
-        else:
-            update.message.reply_text("⚠️ Metrics message is missing or invalid.")
-    except Exception as e:
-        update.message.reply_text(f"⚠️ Error reading metrics: {e}")
-
 def check_message(update: Update, context: CallbackContext):
     print(f"[GROUP MESSAGE] {update.message.text}")
     should_skip_spam_check = False
@@ -402,6 +390,17 @@ def check_message(update: Update, context: CallbackContext):
         pattern = rf'(?<!\w)/?{re.escape(normalized_trigger)}(_\w+)?(?!\w)'
         
         if re.search(pattern, message_text):
+
+            if normalized_trigger == "metrics":
+                try:
+                    with open("filters/metrics.json", "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    response_text = data.get("last_metrics_message", "⚠️ Metrics message is missing or invalid.")
+                    message.reply_text(response_text)
+                except Exception as e:
+                    message.reply_text(f"⚠️ Error reading metrics: {e}")
+                return
+        
             response_text = filter_data.get("response_text", "")
             media_file = filter_data.get("media")
             media_type = filter_data.get("type", "gif").lower()
@@ -438,7 +437,6 @@ def main():
     dp.add_handler(CommandHandler("filters", list_filters))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_members))
     dp.add_handler(MessageHandler(Filters.text | Filters.command, check_message))
-    dp.add_handler(CommandHandler("metrics", metrics_handler, filters=Filters.group))
 
     updater.start_polling()
     updater.idle()
