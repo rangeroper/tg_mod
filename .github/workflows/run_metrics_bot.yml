@@ -18,27 +18,33 @@ jobs:
       TOKEN_ADDRESS: ${{ secrets.TOKEN_ADDRESS }}
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repo (fetch all branches)
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-          ref: main
-      
+
       - name: Fetch all branches
         run: git fetch --all
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run metrics bot script
+        run: python metrics_bot.py
 
       - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Checkout and update staging branch
-        run: |
-          git checkout staging
-          git pull origin staging --rebase
-
-      # Run your bot, install dependencies, etc.
+      - name: Checkout staging branch
+        run: git checkout staging
 
       - name: Commit and push changes to staging
         run: |
@@ -57,7 +63,6 @@ jobs:
 
       - name: Cherry-pick staging commit(s) to main
         run: |
-          # Find last commit hash on staging branch (you just pushed)
           LATEST_COMMIT=$(git rev-parse staging)
           git cherry-pick $LATEST_COMMIT || {
             echo "Cherry-pick failed, aborting."
@@ -67,4 +72,3 @@ jobs:
 
       - name: Push changes to main
         run: git push origin main
-
