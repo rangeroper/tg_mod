@@ -1,105 +1,10 @@
 {
   "dataset_name": "telegram_metrics",
-  "created_at": "2025-05-18T08:24:19.209132+00:00",
+  "created_at": "2025-05-18T09:12:14.546925+00:00",
   "entries": [
     {
-      "id": "ab9b0d0d-7a96-482d-9812-de2f142861c1",
-      "timestamp": "2025-05-18T04:42:18.312997+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "4a9ac88a-9b01-4442-84ce-c0288d757f2a",
-      "timestamp": "2025-05-18T04:44:55.607930+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "b24e1369-292b-48dc-b280-62cab5992ad8",
-      "timestamp": "2025-05-18T04:48:51.206511+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "fd66af3d-f917-4f9b-ac64-58bd79164171",
-      "timestamp": "2025-05-18T04:49:58.759563+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "e9972d74-7ac2-464e-a98c-bf7f34a77de3",
-      "timestamp": "2025-05-18T04:51:15.320147+00:00",
-      "member_count": 4
-    },
-    {
-<<<<<<< HEAD
-      "id": "11a122c8-5583-44b5-b967-c24d597f3dd1",
-      "timestamp": "2025-05-18T06:43:56.305435+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "de3bc675-1aa9-498f-9d9d-5dd62eb8e532",
-      "timestamp": "2025-05-18T06:52:32.665052+00:00",
-=======
-      "id": "c1c54137-3918-4b15-8ce2-238d7327fb01",
-      "timestamp": "2025-05-18T07:03:14.678001+00:00",
->>>>>>> staging
-      "member_count": 4
-    },
-    {
-      "id": "b3d46ecd-473a-4836-9ca3-401f9e8b08fc",
-      "timestamp": "2025-05-18T07:12:31.002314+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "a2d12179-c51f-46d6-af75-d6d575f6c450",
-      "timestamp": "2025-05-18T07:13:49.058641+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "be7c68e3-93f9-4ba8-a4dc-0c31754e9a88",
-      "timestamp": "2025-05-18T07:43:27.294222+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "f936e3b2-2b7e-43e6-8acc-a36398ee7e06",
-      "timestamp": "2025-05-18T07:46:23.789322+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "bbc16827-b446-4426-bf04-9d21128bb176",
-      "timestamp": "2025-05-18T07:52:19.669007+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "03183b90-3157-40d3-ab1d-52e06cb9bf25",
-      "timestamp": "2025-05-18T07:55:27.546420+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "59094757-afc4-4eb8-9d16-89627ddd4bc3",
-      "timestamp": "2025-05-18T08:01:27.860050+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "33de3656-34dd-413c-b8cf-504438cccedd",
-      "timestamp": "2025-05-18T08:11:45.617343+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "2b9ff7cb-d209-4d53-94cb-6a3be25181b8",
-      "timestamp": "2025-05-18T08:14:28.801908+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "0e47163d-9507-4a4a-961d-f2ef6e50aed7",
-      "timestamp": "2025-05-18T08:17:36.956829+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "bfe21a2b-aeb4-4c2b-b0f6-fadcaa15dbf2",
-      "timestamp": "2025-05-18T08:19:38.299181+00:00",
-      "member_count": 4
-    },
-    {
-      "id": "c385b271-6d29-4f4c-b380-5bf2719a1ab9",
-      "timestamp": "2025-05-18T08:20:40.387867+00:00",
+      "id": "ad84f4cf-ce57-41c9-97dc-3d30f29ab5b9",
+      "timestamp": "2025-05-18T09:12:14.546921+00:00",
       "member_count": 4
     }
   ]
