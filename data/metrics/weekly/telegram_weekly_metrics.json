@@ -1,13 +1,13 @@
 {
   "dataset_name": "telegram_weekly_metrics",
-  "created_at": "2025-05-18T19:27:19.048958Z",
-  "change": {
-    "member_count": 0.0
+  "created_at": "2025-05-19T04:37:47.111462Z",
+  "previous": {
+    "member_count": 4
   },
   "current": {
     "member_count": 4
   },
-  "previous": {
-    "member_count": 4
+  "change": {
+    "member_count": 0.0
   }
 }

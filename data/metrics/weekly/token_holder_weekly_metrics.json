@@ -1,13 +1,13 @@
 {
   "dataset_name": "token_holder_weekly_metrics",
-  "created_at": "2025-05-18T19:27:19.049953Z",
-  "change": {
-    "holder_count": -0.0
+  "created_at": "2025-05-19T04:37:47.112462Z",
+  "previous": {
+    "holder_count": 53606
   },
   "current": {
-    "holder_count": 53618
+    "holder_count": 53606
   },
-  "previous": {
-    "holder_count": 53619
+  "change": {
+    "holder_count": 0.0
   }
 }
