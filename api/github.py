@@ -15,18 +15,36 @@ def get_github_stats():
     if not repo:
         return "❌ REPO not set in environment."
 
+    # Fetch general repo info
     url = f"https://api.github.com/repos/{repo}"
     response = requests.get(url)
-
     if response.status_code != 200:
         return "❌ Error fetching GitHub stats."
 
     data = response.json()
     stars = data.get("stargazers_count", 0)
     forks = data.get("forks_count", 0)
-    release_version = get_current_release_version(repo)
 
-    # Build entry
+    # Fetch releases and filter for rig-core
+    releases_url = f"https://api.github.com/repos/{repo}/releases"
+    releases_response = requests.get(releases_url)
+    if releases_response.status_code != 200:
+        return "❌ Error fetching releases."
+
+    releases = releases_response.json()
+    rig_core_versions = [
+        release.get("tag_name", "N/A")
+        for release in releases
+        if "rig-core" in release.get("tag_name", "")
+    ]
+
+    if not rig_core_versions:
+        release_version = "N/A"
+    else:
+        rig_core_versions.sort(reverse=True)
+        release_version = rig_core_versions[0]
+
+    # Build metrics entry
     timestamp = datetime.now(timezone.utc).isoformat()
     entry = {
         "id": str(uuid.uuid4()),
@@ -41,15 +59,8 @@ def get_github_stats():
     return (
         f"⭐️ Github Stars  >>  {stars:,}\n"
         f"🍴 Github Forks  >>  {forks:,}\n"
-        f"🔖 Rig Version  >>  {release_version}"
+        f"🔖 Rig Version   >>  {release_version}"
     )
-
-def get_current_release_version(repo):
-    url = f"https://api.github.com/repos/{repo}/releases/latest"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json().get("tag_name", "N/A")
-    return "N/A"
 
 def save_github_metrics(new_entry):
     """Appends the new GitHub stats entry to the metrics file."""

@@ -1,6 +1,6 @@
 {
   "dataset_name": "telegram_metrics",
-  "created_at": "2025-05-18T20:25:48.116650+00:00",
+  "created_at": "2025-05-19T03:37:39.833407+00:00",
   "entries": [
     {
       "id": "ad84f4cf-ce57-41c9-97dc-3d30f29ab5b9",
@@ -40,6 +40,131 @@
     {
       "id": "922b908b-cdca-4f73-a42b-a5b7a10f2da6",
       "timestamp": "2025-05-18T20:25:48.116650+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "6921b47d-aee7-46eb-b278-f7177d70d1d0",
+      "timestamp": "2025-05-19T01:53:30.342517+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "cf0b97cf-6cad-41bd-91d6-f53334dea11e",
+      "timestamp": "2025-05-19T01:56:49.295241+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "6294364e-f873-48ef-9f08-3819ee32cdaf",
+      "timestamp": "2025-05-19T02:14:32.119028+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "986962a8-3b86-4108-9b3e-82cca1d07aa3",
+      "timestamp": "2025-05-19T02:19:04.540580+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "d2a7fdbf-300e-45e4-87bb-6ca0510a70ee",
+      "timestamp": "2025-05-19T02:23:05.688222+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "ee162eb6-0da5-4b3d-a434-f0f14bbab7f3",
+      "timestamp": "2025-05-19T02:23:16.119503+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "95afde86-3b1c-4972-9d5f-1655b5a69029",
+      "timestamp": "2025-05-19T02:26:41.865661+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "a752f688-0ebf-4cd2-8392-afce9781c4ca",
+      "timestamp": "2025-05-19T02:27:55.983293+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "08f29a36-a655-4c5c-a74c-b04586de3339",
+      "timestamp": "2025-05-19T02:29:15.954305+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "cffde388-10a8-4fcb-ab90-3e84c1b837fa",
+      "timestamp": "2025-05-19T02:32:51.297804+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "9f6a7d2b-f0f0-48c8-aca8-5f9d992f2613",
+      "timestamp": "2025-05-19T02:34:24.372264+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "93d69703-477a-4ae5-a82f-22bcfc934167",
+      "timestamp": "2025-05-19T02:36:12.025950+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "b5ce1a8c-49e0-43db-9041-e1793ed2344b",
+      "timestamp": "2025-05-19T02:52:11.352150+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "5d613762-d94c-41a7-bd6a-86f63a61541b",
+      "timestamp": "2025-05-19T02:55:22.479037+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "0322264f-dbcc-434e-8273-e32c499d4966",
+      "timestamp": "2025-05-19T02:58:29.623998+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "66ff5895-540c-48dd-a06c-c04d8b331d45",
+      "timestamp": "2025-05-19T03:00:20.327665+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "71d499cd-e522-4691-93f5-acf745ca2ffc",
+      "timestamp": "2025-05-19T03:02:26.742456+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "2660282d-ccbf-4e2e-ad5a-36b9e8a3b805",
+      "timestamp": "2025-05-19T03:11:29.619267+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "a7741624-a394-440e-80fb-3a6877f8a4e6",
+      "timestamp": "2025-05-19T03:14:07.965413+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "179bd5d8-a320-4401-a333-1685cda28e44",
+      "timestamp": "2025-05-19T03:16:27.619193+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "161dab3d-5dd7-42a4-9bdd-8e08977d56a4",
+      "timestamp": "2025-05-19T03:18:52.934163+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "b876c08c-249f-4b13-b350-516b2d266884",
+      "timestamp": "2025-05-19T03:21:48.053499+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "bb92de7d-b6fe-4644-b533-182b5257071d",
+      "timestamp": "2025-05-19T03:29:54.872697+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "684bc0d7-6128-414d-965b-6156f7a85bef",
+      "timestamp": "2025-05-19T03:31:14.880912+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "db98f2bd-d32d-40e1-9518-2b10a2ee3a0a",
+      "timestamp": "2025-05-19T03:37:39.833407+00:00",
       "member_count": 4
     }
   ]

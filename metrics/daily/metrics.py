@@ -14,6 +14,11 @@ from api.holders import get_token_stats
 from api.github import get_github_stats
 from api.followers import get_x_followers_stats
 
+from achievements.github_achievements import check_github_achievements
+from achievements.telegram_achievements import check_telegram_achievements
+from achievements.token_holder_achievements import check_token_holder_achievements
+from achievements.x_follower_achievements import check_x_follower_achievements
+
 load_dotenv()
 
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -56,17 +61,43 @@ async def main():
 
     x_followers_message = x_followers_stats.get("data", {}).get("message", str(x_followers_stats))
 
+    github_achievement_messages = check_github_achievements()
+    telegram_achievement_messages = check_telegram_achievements() 
+    token_holder_achievement_messages = check_token_holder_achievements()
+    x_follower_achievement_messages = check_x_follower_achievements()
+
     # Create a list of messages
-    messages = [
+    core_messages = [
         github_stats,
         telegram_message,
         token_stats,
         x_followers_message
     ]
 
-    # Send all metrics together in one message
-    full_message = send_update_to_tg(messages)
-    save_last_metrics_message_as_filter(full_message)
+    messages = core_messages.copy()
+
+    if github_achievement_messages or telegram_achievement_messages or token_holder_achievement_messages or x_follower_achievement_messages:
+        separator = "────────────" * 3
+        messages.append(separator)
+
+    if github_achievement_messages:
+        messages.extend(github_achievement_messages)
+
+    if telegram_achievement_messages:
+        messages.extend(telegram_achievement_messages)
+
+    if token_holder_achievement_messages:
+        messages.extend(token_holder_achievement_messages)
+
+    if x_follower_achievement_messages:
+        messages.extend(x_follower_achievement_messages)
+
+    # Send all messages to Telegram (metrics + achievements)
+    send_update_to_tg(messages)
+
+    # Save only core metrics message (without achievements) as filter
+    core_full_message = "\n\n".join(core_messages)
+    save_last_metrics_message_as_filter(core_full_message)
 
 if __name__ == "__main__":
     asyncio.run(main())
