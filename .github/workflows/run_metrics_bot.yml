@@ -44,7 +44,7 @@ jobs:
           git pull origin staging --rebase
 
       - name: Run metrics bot script
-        run: python metrics/daily/metrics_bot.py
+        run: python metrics/daily/metrics.py
 
       - name: Configure Git
         run: |
