@@ -1,2 +1,62 @@
+import asyncio
+from playwright.async_api import async_playwright
+
+X_PROFILES = [
+    "https://x.com/arcdotfun",
+    "https://x.com/0thTachi",
+    "https://x.com/Kezo_Futura"
+]
+
+async def get_latest_post_from_profile(url):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
+
+        await page.goto(url)
+        await page.wait_for_selector("[data-testid='cellInnerDiv']")
+
+        post = await page.query_selector("[data-testid='cellInnerDiv']")
+        if not post:
+            return None
+
+        # Get timestamp
+        time_element = await post.query_selector("time")
+        timestamp = await time_element.get_attribute("datetime") if time_element else "Unknown time"
+
+        # Get link
+        link_element = await post.query_selector("a[href*='/status/']")
+        relative_link = await link_element.get_attribute("href") if link_element else None
+        full_link = f"https://x.com{relative_link}" if relative_link else "Link not found"
+
+        # Get preview image (if any)
+        img_element = await post.query_selector("img")
+        image_url = await img_element.get_attribute("src") if img_element else None
+
+        return {
+            "url": full_link,
+            "timestamp": timestamp,
+            "image": image_url
+        }
+
+async def get_all_latest_posts():
+    results = []
+    for profile in X_PROFILES:
+        post = await get_latest_post_from_profile(profile)
+        if post:
+            results.append(post)
+    return results
+
 def get_latest_posts():
-    return "📝 Here are the latest posts"
+    posts = asyncio.get_event_loop().run_until_complete(get_all_latest_posts())
+    if not posts:
+        return "⚠️ No posts found."
+
+    message_lines = ["🧵 **Latest Posts:**"]
+    for post in posts:
+        preview = f"[🧵 {post['timestamp']}]({post['url']})"
+        if post["image"]:
+            preview += f"\n[‌]({post['image']})"  # Zero-width character for Telegram preview
+        message_lines.append(preview)
+
+    return "\n\n".join(message_lines)

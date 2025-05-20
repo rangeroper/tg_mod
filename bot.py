@@ -443,10 +443,11 @@ def check_message(update: Update, context: CallbackContext):
     if re.search(r'(?<!\w)/posts(?!\w)', message_text):
         try:
             response_text = get_latest_posts()
-            message.reply_text(response_text)
+            message.reply_text(response_text, disable_web_page_preview=False, parse_mode="Markdown")
         except Exception as e:
             message.reply_text(f"⚠️ Error fetching posts: {e}")
         return
+
 
 def main():
     print("starting bot")
