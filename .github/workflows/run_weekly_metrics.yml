@@ -41,7 +41,7 @@ jobs:
         run: |
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "Update weekly metrics"
+            git commit -m "update weekly metrics"
             git push origin staging
           else
             echo "No changes to commit on staging."
