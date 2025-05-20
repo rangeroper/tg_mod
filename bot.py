@@ -449,6 +449,7 @@ def check_message(update: Update, context: CallbackContext):
         return
 
 
+
 def main():
     print("starting bot")
     updater = Updater(BOT_TOKEN, use_context=True)

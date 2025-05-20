@@ -8,36 +8,42 @@ X_PROFILES = [
 ]
 
 async def get_latest_post_from_profile(url):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context()
-        page = await context.new_page()
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context()
+            page = await context.new_page()
 
-        await page.goto(url)
-        await page.wait_for_selector("[data-testid='cellInnerDiv']")
+            await page.goto(url)
+            await page.wait_for_selector("[data-testid='cellInnerDiv']")
 
-        post = await page.query_selector("[data-testid='cellInnerDiv']")
-        if not post:
-            return None
+            post = await page.query_selector("[data-testid='cellInnerDiv']")
+            if not post:
+                return None
 
-        # Get timestamp
-        time_element = await post.query_selector("time")
-        timestamp = await time_element.get_attribute("datetime") if time_element else "Unknown time"
+            # Get timestamp
+            time_element = await post.query_selector("time")
+            timestamp = await time_element.get_attribute("datetime") if time_element else "Unknown time"
 
-        # Get link
-        link_element = await post.query_selector("a[href*='/status/']")
-        relative_link = await link_element.get_attribute("href") if link_element else None
-        full_link = f"https://x.com{relative_link}" if relative_link else "Link not found"
+            # Get link
+            link_element = await post.query_selector("a[href*='/status/']")
+            relative_link = await link_element.get_attribute("href") if link_element else None
+            full_link = f"https://x.com{relative_link}" if relative_link else "Link not found"
 
-        # Get preview image (if any)
-        img_element = await post.query_selector("img")
-        image_url = await img_element.get_attribute("src") if img_element else None
+            # Get preview image (if any)
+            img_element = await post.query_selector("img")
+            image_url = await img_element.get_attribute("src") if img_element else None
 
-        return {
-            "url": full_link,
-            "timestamp": timestamp,
-            "image": image_url
-        }
+            await browser.close()
+
+            return {
+                "url": full_link,
+                "timestamp": timestamp,
+                "image": image_url
+            }
+    except Exception as e:
+        print(f"Error fetching post from {url}: {e}")
+        return None
 
 async def get_all_latest_posts():
     results = []
@@ -47,8 +53,8 @@ async def get_all_latest_posts():
             results.append(post)
     return results
 
-def get_latest_posts():
-    posts = asyncio.get_event_loop().run_until_complete(get_all_latest_posts())
+async def get_latest_posts():
+    posts = await get_all_latest_posts()
     if not posts:
         return "⚠️ No posts found."
 
@@ -56,7 +62,7 @@ def get_latest_posts():
     for post in posts:
         preview = f"[🧵 {post['timestamp']}]({post['url']})"
         if post["image"]:
-            preview += f"\n[‌]({post['image']})"  # Zero-width character for Telegram preview
+            preview += f"\n[‌]({post['image']})"  # zero-width char for preview in Telegram
         message_lines.append(preview)
 
     return "\n\n".join(message_lines)
