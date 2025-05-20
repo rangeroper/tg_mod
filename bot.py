@@ -8,6 +8,7 @@ from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone, time
 from combot.scheduled_warnings import messages
 from combot.brand_assets import messages as brand_assets_messages
+from api.posts import get_latest_posts
 
 load_dotenv()  # Load .env vars
 
@@ -437,6 +438,14 @@ def check_message(update: Update, context: CallbackContext):
             message.reply_text(response_text)
         except Exception as e:
             message.reply_text(f"⚠️ Error reading weekly metrics: {e}")
+        return
+    
+    if re.search(r'(?<!\w)/?posts(?!\w)', message_text):
+        try:
+            response_text = get_latest_posts()
+            message.reply_text(response_text)
+        except Exception as e:
+            message.reply_text(f"⚠️ Error fetching posts: {e}")
         return
 
 def main():
