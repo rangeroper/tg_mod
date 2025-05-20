@@ -8,7 +8,6 @@ from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone, time
 from combot.scheduled_warnings import messages
 from combot.brand_assets import messages as brand_assets_messages
-from api.posts import get_latest_posts
 
 load_dotenv()  # Load .env vars
 
@@ -442,10 +441,12 @@ def check_message(update: Update, context: CallbackContext):
     
     if re.search(r'(?<!\w)/posts(?!\w)', message_text):
         try:
-            response_text = get_latest_posts()
+            with open("filters/posts.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            response_text = data.get("latest_posts_message", "⚠️ Latest posts message is missing or invalid.")
             message.reply_text(response_text, disable_web_page_preview=False, parse_mode="Markdown")
         except Exception as e:
-            message.reply_text(f"⚠️ Error fetching posts: {e}")
+            message.reply_text(f"⚠️ Error reading posts: {e}")
         return
 
 
