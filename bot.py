@@ -54,6 +54,20 @@ def get_admin_ids(context, chat_id):
     chat_admins = context.bot.get_chat_administrators(chat_id)
     return [admin.user.id for admin in chat_admins]
 
+def normalize_name(name: str) -> str:
+    # Lowercase
+    name = name.lower()
+    # Strip leading/trailing whitespace
+    name = name.strip()
+    # Replace any sequence of whitespace chars (spaces, tabs, newlines) with a single space
+    name = re.sub(r'\s+', ' ', name)
+    return name
+
+def get_admin_names(context, chat_id):
+    """Return a list of normalized full names (lowercased, whitespace cleaned) for all human admins."""
+    chat_admins = context.bot.get_chat_administrators(chat_id)
+    return [normalize_name(admin.user.full_name) for admin in chat_admins if not admin.user.is_bot]
+
 # combot security message
 def post_security_message(context: CallbackContext, index: int):
     try:
@@ -220,6 +234,7 @@ def handle_new_members(update, context):
         return
 
     chat_id = message.chat.id
+    admin_names = get_admin_names(context, chat_id)
 
     for new_user in message.new_chat_members:
         name = new_user.full_name or "No Name"
@@ -229,11 +244,19 @@ def handle_new_members(update, context):
         name_info = f"Name: {name}, Username: @{username}" if new_user.username else f"Name: {name} (no username)"
         print(f"[JOIN] {name_info} (ID: {user_id})")
 
-        name_lower = name.lower()
+        name_norm = normalize_name(name)
         username_lower = username.lower()
 
+        if name_norm in admin_names:
+            try:
+                context.bot.ban_chat_member(chat_id, user_id)
+                print(f"[BANNED] Name '{name}' normalized to '{name_norm}' matches an admin name. Banned for impersonation.")
+                continue
+            except Exception as e:
+                print(f"[ERROR] Failed to ban user with admin name {user_id}: {e}")
+
         # Check for suspicious keywords in name
-        if any(keyword in name_lower or keyword in username_lower for keyword in SUSPICIOUS_USERNAMES):
+        if any(keyword in name_norm or keyword in username_lower for keyword in SUSPICIOUS_USERNAMES):
             try:
                 context.bot.ban_chat_member(chat_id, user_id)
                 print(f"[BANNED] Suspicious user auto-banned: {name_info}")
@@ -242,7 +265,7 @@ def handle_new_members(update, context):
                 print(f"[ERROR] Failed to ban {user_id}: {e}")
 
         # Check for bio phrases in name
-        if any(keyword in name_lower or keyword in username_lower for keyword in BIO_PHRASES):
+        if any(keyword in name_norm or keyword in username_lower for keyword in BIO_PHRASES):
             try:
                 context.bot.ban_chat_member(chat_id, user_id)
                 print(f"[BANNED] User with suspicious name (bio phrase): {name_info}")
@@ -286,25 +309,36 @@ def check_message(update: Update, context: CallbackContext):
     # Fetch chat admins to prevent acting on their messages
     chat_admins = context.bot.get_chat_administrators(chat_id)
     admin_ids = [admin.user.id for admin in chat_admins]
+
+    # Normalize and fetch admin names for impersonation check
+    admin_names_normalized = get_admin_names(context, chat_id)
+    user_name_normalized = normalize_name(user.full_name)
     
     # Ignore messages from admins
     if user_id not in admin_ids:
 
-        # check if message is too short
-        if len(message_text.strip()) < 2:
-            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-            return
-
-        # Auto-ban based on suspicious name or username
+        # Check for suspicious name or username
         name_username = f"{user.full_name} {user.username or ''}".lower()
         if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
             context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+            print(f"[BANNED] Suspicious keyword match in name/username: {user.full_name} (@{user.username})")
             return
         
         # Auto-ban based on bio-like phrases in name/username
         if any(keyword in name_username for keyword in BIO_PHRASES):
             context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
             print(f"[BANNED] Bio phrase detected in name: {name_username}")
+            return
+
+        # Check for name impersonation
+        if user_name_normalized in admin_names_normalized:
+            context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+            print(f"[BANNED] Impersonation detected: {user.full_name} matched an admin name")
+            return
+
+        # check if message is too short
+        if len(message_text.strip()) < 2:
+            context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)
             return
         
         # Delete message if it contains non-X links
