@@ -420,7 +420,7 @@ def check_message(update: Update, context: CallbackContext):
                 message.reply_text(response_text)
             return  # Respond only once
         
-    if re.search(r'(?<!\w)/?metrics(?!\w)', message_text):
+    if re.search(r'(?<!\w)/metrics(?!\w)', message_text):
         try:
             with open("filters/metrics.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -430,7 +430,7 @@ def check_message(update: Update, context: CallbackContext):
             message.reply_text(f"⚠️ Error reading metrics: {e}")
         return
     
-    if re.search(r'(?<!\w)/?growth(?!\w)', message_text):
+    if re.search(r'(?<!\w)/growth(?!\w)', message_text):
         try:
             with open("filters/growth.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -440,7 +440,7 @@ def check_message(update: Update, context: CallbackContext):
             message.reply_text(f"⚠️ Error reading weekly metrics: {e}")
         return
     
-    if re.search(r'(?<!\w)/?posts(?!\w)', message_text):
+    if re.search(r'(?<!\w)/posts(?!\w)', message_text):
         try:
             response_text = get_latest_posts()
             message.reply_text(response_text)
