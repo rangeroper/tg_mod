@@ -8,7 +8,7 @@ from telegram import Bot
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-GROUP_CHAT_ID = os.getenv("GROUP_CHAT_ID")
+API_CHAT_ID = os.getenv("API_CHAT_ID")
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 DATA_FILE = "data/metrics/daily/telegram_metrics.json"
@@ -69,7 +69,7 @@ def get_latest_member_count():
 def get_telegram_stats():
     """Fetch current member count, log it, and return formatted message."""
     try:
-        current_count = bot.get_chat_member_count(GROUP_CHAT_ID)
+        current_count = bot.get_chat_member_count(API_CHAT_ID)
         log_member_count(current_count)
         formatted_count = "{:,}".format(current_count)
         return f"👥 Telegram Members  >>  {formatted_count}"
