@@ -36,7 +36,6 @@ def load_data():
         "entries": []
     }
 
-
 def save_data(data):
     """Save the full dataset, update created_at timestamp"""
     data["created_at"] = datetime.now(timezone.utc).isoformat()
@@ -57,14 +56,12 @@ def log_member_count(count):
     save_data(data)
     return new_entry
 
-
 def get_latest_member_count():
     """Return the last recorded member count, or 0 if none."""
     data = load_data()
     if data["entries"]:
         return data["entries"][-1]["member_count"]
     return 0
-
 
 def get_telegram_stats():
     """Fetch current member count, log it, and return formatted message."""
