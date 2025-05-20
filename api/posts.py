@@ -1,5 +1,6 @@
 import asyncio
 import json
+import sys
 from pathlib import Path
 from datetime import datetime
 from playwright.async_api import async_playwright
@@ -22,7 +23,7 @@ def extract_username(url):
     parsed = urlparse(url)
     return parsed.path.strip("/").split("/")[0]
 
-async def get_latest_post_from_profile(url):
+async def get_latest_posts_from_profile(url, max_scrolls=10):
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
@@ -32,42 +33,53 @@ async def get_latest_post_from_profile(url):
             await page.goto(url)
             await page.wait_for_selector("[data-testid='cellInnerDiv']")
 
-            posts = await page.query_selector_all("[data-testid='cellInnerDiv']")
+            seen_urls = set()
+            results = []
 
-            for post in posts:
-                pinned_label = await post.query_selector("span:has-text('Pinned')")
-                if pinned_label:
-                    continue
+            for _ in range(max_scrolls):
+                posts = await page.query_selector_all("[data-testid='cellInnerDiv']")
+                for post in posts:
+                    time_element = await post.query_selector("time")
+                    timestamp = await time_element.get_attribute("datetime") if time_element else None
+                    if not timestamp:
+                        continue
 
-                time_element = await post.query_selector("time")
-                timestamp = await time_element.get_attribute("datetime") if time_element else "Unknown time"
+                    link_element = await post.query_selector("a[href*='/status/']")
+                    relative_link = await link_element.get_attribute("href") if link_element else None
+                    if not relative_link:
+                        continue
 
-                link_element = await post.query_selector("a[href*='/status/']")
-                relative_link = await link_element.get_attribute("href") if link_element else None
-                full_link = f"https://x.com{relative_link}" if relative_link else "Link not found"
+                    full_link = f"https://x.com{relative_link}"
+                    if full_link in seen_urls:
+                        continue
+                    seen_urls.add(full_link)
 
-                await browser.close()
+                    results.append({
+                        "username": extract_username(url),
+                        "url": full_link,
+                        "timestamp": timestamp
+                    })
 
-                return {
-                    "username": extract_username(url),
-                    "url": full_link,
-                    "timestamp": timestamp
-                }
+                # Scroll to bottom and wait for new content
+                await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
+                await page.wait_for_timeout(1500)
 
             await browser.close()
-            return None
+
+            # Sort by timestamp descending
+            sorted_results = sorted(results, key=lambda x: x["timestamp"], reverse=True)
+            return sorted_results
 
     except Exception as e:
-        print(f"Error fetching post from {url}: {e}")
-        return None
+        print(f"Error fetching posts from {url}: {e}")
+        return []
 
 async def get_all_latest_posts():
-    results = []
+    all_results = []
     for profile in X_PROFILES:
-        post = await get_latest_post_from_profile(profile)
-        if post:
-            results.append(post)
-    return results
+        posts = await get_latest_posts_from_profile(profile)
+        all_results.extend(posts)
+    return all_results
 
 async def build_latest_posts_message():
     posts = await get_all_latest_posts()
@@ -101,5 +113,20 @@ async def main():
     except Exception as e:
         print(f"Error writing posts.json: {e}")
 
+# ✅ Local test helper:
+async def test_profile(profile_url):
+    print(f"\n🔍 Testing profile: {profile_url}")
+    posts = await get_latest_posts_from_profile(profile_url, count=3)
+    for i, post in enumerate(posts, 1):
+        print(f"\nPost {i}:")
+        print(f"Username: {post['username']}")
+        print(f"Time: {format_timestamp(post['timestamp'])}")
+        print(f"URL: {post['url']}")
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        # Example usage: python script.py test https://x.com/arcdotfun
+        test_url = sys.argv[2] if len(sys.argv) > 2 else X_PROFILES[0]
+        asyncio.run(test_profile(test_url))
+    else:
+        asyncio.run(main())
