@@ -1,13 +1,29 @@
 import asyncio
 import json
 from pathlib import Path
+from datetime import datetime
 from playwright.async_api import async_playwright
+from urllib.parse import urlparse
 
 X_PROFILES = [
     "https://x.com/arcdotfun",
     "https://x.com/0thTachi",
     "https://x.com/Kezo_Futura"
 ]
+
+def format_timestamp(iso_ts):
+    """Convert ISO 8601 timestamp to DD/MM/YYYY hh:mm AM/PM format."""
+    try:
+        # Parse ISO timestamp, handle timezone naive and aware
+        dt = datetime.fromisoformat(iso_ts.replace("Z", "+00:00"))
+        return dt.strftime("%d/%m/%Y %I:%M %p")
+    except Exception:
+        return "Unknown time"
+
+def extract_username(url):
+    """Extract username from URL, e.g. https://x.com/arcdotfun -> arcdotfun"""
+    parsed = urlparse(url)
+    return parsed.path.strip("/").split("/")[0]
 
 async def get_latest_post_from_profile(url):
     try:
@@ -36,6 +52,7 @@ async def get_latest_post_from_profile(url):
             await browser.close()
 
             return {
+                "username": extract_username(url),
                 "url": full_link,
                 "timestamp": timestamp,
                 "image": image_url
@@ -59,12 +76,18 @@ async def build_latest_posts_message():
 
     message_lines = ["🧵 **Latest Posts:**"]
     for post in posts:
-        preview = f"[🧵 {post['timestamp']}]({post['url']})"
+        formatted_time = format_timestamp(post['timestamp'])
+        username = post['username']
+        preview = (
+            f"**{username}**  \n"
+            f"🕒 {formatted_time}  \n"
+            f"[View Post]({post['url']})"
+        )
         if post["image"]:
             preview += f"\n[‌]({post['image']})"  # zero-width char to show preview in Telegram
         message_lines.append(preview)
 
-    return "\n\n".join(message_lines)
+    return "\n\n---\n\n".join(message_lines)  # Add separators between posts
 
 async def main():
     message = await build_latest_posts_message()
