@@ -276,8 +276,15 @@
       "release_version": "rig-core-v0.12.0"
     },
     {
-      "id": "6698d17b-4965-4e06-b7e4-cc87c044fa92",
-      "timestamp": "2025-05-21T00:46:56.733943+00:00",
+      "id": "672fec74-cba4-4078-8cde-62eaf63405c0",
+      "timestamp": "2025-05-21T00:50:44.778889+00:00",
+      "stars": 3639,
+      "forks": 396,
+      "release_version": "rig-core-v0.12.0"
+    },
+    {
+      "id": "54b88c29-384c-4044-8645-dc281b7c02be",
+      "timestamp": "2025-05-21T00:59:19.928373+00:00",
       "stars": 3639,
       "forks": 396,
       "release_version": "rig-core-v0.12.0"
