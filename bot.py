@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import unicodedata
 from dotenv import load_dotenv
 from telegram import Update, ChatPermissions, ParseMode
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler, Filters
@@ -31,9 +32,10 @@ DELETE_PHRASES_FILE = "blocklists/delete_phrases.txt"
 WHITELIST_PHRASES_FILE = "whitelists/whitelist_phrases.txt"
 
 # Suspicious names to auto-ban
-SUSPICIOUS_USERNAMES = [
-    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent", "arch_agent", "arch agent", "support", "helpdesk", "administrator", "arc admin", "arc_admin"
-]
+SUSPICIOUS_USERNAMES = [normalize_name(name) for name in [
+    "dev", "developer", "admin", "mod", "owner", "arc", "arc_agent", "arc agent",
+    "arch_agent", "arch agent", "support", "helpdesk", "administrator", "arc admin", "arc_admin"
+]]
 
 BIO_PHRASES = [
     "verify in bio", "link in bio", "read bio", "look at bio", "info in bio"
@@ -55,11 +57,11 @@ def get_admin_ids(context, chat_id):
     return [admin.user.id for admin in chat_admins]
 
 def normalize_name(name: str) -> str:
-    # Lowercase
+    name = unicodedata.normalize("NFKD", name)
+    name = ''.join(c for c in name if not unicodedata.combining(c))
+    name = re.sub(r'[^a-zA-Z0-9_ ]+', '', name)
     name = name.lower()
-    # Strip leading/trailing whitespace
     name = name.strip()
-    # Replace any sequence of whitespace chars (spaces, tabs, newlines) with a single space
     name = re.sub(r'\s+', ' ', name)
     return name
 
@@ -244,8 +246,9 @@ def handle_new_members(update, context):
         name_info = f"Name: {name}, Username: @{username}" if new_user.username else f"Name: {name} (no username)"
         print(f"[JOIN] {name_info} (ID: {user_id})")
 
+        # Normalize names and usernames
         name_norm = normalize_name(name)
-        username_lower = username.lower()
+        username_norm = normalize_name(username)
 
         if name_norm in admin_names:
             try:
@@ -255,8 +258,8 @@ def handle_new_members(update, context):
             except Exception as e:
                 print(f"[ERROR] Failed to ban user with admin name {user_id}: {e}")
 
-        # Check for suspicious keywords in name
-        if any(keyword in name_norm or keyword in username_lower for keyword in SUSPICIOUS_USERNAMES):
+        # Check for suspicious keywords
+        if any(keyword in name_norm or keyword in username_norm for keyword in SUSPICIOUS_USERNAMES):
             try:
                 context.bot.ban_chat_member(chat_id, user_id)
                 print(f"[BANNED] Suspicious user auto-banned: {name_info}")
@@ -264,8 +267,8 @@ def handle_new_members(update, context):
             except Exception as e:
                 print(f"[ERROR] Failed to ban {user_id}: {e}")
 
-        # Check for bio phrases in name
-        if any(keyword in name_norm or keyword in username_lower for keyword in BIO_PHRASES):
+        # Check for bio phrases
+        if any(keyword in name_norm or keyword in username_norm for keyword in BIO_PHRASES):
             try:
                 context.bot.ban_chat_member(chat_id, user_id)
                 print(f"[BANNED] User with suspicious name (bio phrase): {name_info}")
@@ -312,29 +315,40 @@ def check_message(update: Update, context: CallbackContext):
 
     # Normalize and fetch admin names for impersonation check
     admin_names_normalized = get_admin_names(context, chat_id)
-    user_name_normalized = normalize_name(user.full_name)
+    name_normalized = normalize_name(user.full_name)
+    username_normalized = normalize_name(user.username or "")
     
     # Ignore messages from admins
     if user_id not in admin_ids:
 
-        # Check for suspicious name or username
-        name_username = f"{user.full_name} {user.username or ''}".lower()
-        if any(keyword in name_username for keyword in SUSPICIOUS_USERNAMES):
-            context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
-            print(f"[BANNED] Suspicious keyword match in name/username: {user.full_name} (@{user.username})")
-            return
-        
-        # Auto-ban based on bio-like phrases in name/username
-        if any(keyword in name_username for keyword in BIO_PHRASES):
-            context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
-            print(f"[BANNED] Bio phrase detected in name: {name_username}")
-            return
+        combined_identity = f"{name_normalized} {username_normalized}"
 
-        # Check for name impersonation
-        if user_name_normalized in admin_names_normalized:
-            context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
-            print(f"[BANNED] Impersonation detected: {user.full_name} matched an admin name")
-            return
+        # Check for suspicious keywords
+        if any(keyword in combined_identity for keyword in SUSPICIOUS_USERNAMES):
+            try:
+                context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+                print(f"[BANNED] Suspicious keyword match in name/username: {user.full_name} (@{user.username})")
+                return
+            except Exception as e:
+                print(f"[ERROR] Failed to ban suspicious user {user_id}: {e}")
+
+        # Check for bio-like phrases
+        if any(keyword in combined_identity for keyword in BIO_PHRASES):
+            try:
+                context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+                print(f"[BANNED] Bio phrase detected in name/username: {combined_identity}")
+                return
+            except Exception as e:
+                print(f"[ERROR] Failed to ban user with bio phrase {user_id}: {e}")
+
+        # Check for impersonation
+        if name_normalized in admin_names_normalized:
+            try:
+                context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+                print(f"[BANNED] Impersonation detected: {user.full_name} matched an admin name")
+                return
+            except Exception as e:
+                print(f"[ERROR] Failed to ban impersonator {user_id}: {e}")
 
         # check if message is too short
         if len(message_text.strip()) < 2:
