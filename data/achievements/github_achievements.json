@@ -16,9 +16,16 @@
       "messages": [
         "\ud83c\udf89 Github Fork milestone reached: 400 forks!"
       ]
+    },
+    {
+      "id": "e5f834a8-9c29-4138-90ee-148e83c12de3",
+      "timestamp": "2025-06-10T01:00:47.292525+00:00",
+      "messages": [
+        "\ud83c\udf89 New rig-core version detected: rig-core-v0.13.0!"
+      ]
     }
   ],
   "last_star_milestone": 3000,
   "last_fork_milestone": 400,
-  "last_release_version": null
+  "last_release_version": "rig-core-v0.13.0"
 }
