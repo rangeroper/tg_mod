@@ -1,6 +1,6 @@
 {
   "dataset_name": "telegram_metrics",
-  "created_at": "2025-06-19T01:00:23.911322+00:00",
+  "created_at": "2025-06-20T01:00:12.056639+00:00",
   "entries": [
     {
       "id": "ad84f4cf-ce57-41c9-97dc-3d30f29ab5b9",
@@ -335,6 +335,11 @@
     {
       "id": "84d8a0cd-8add-41b1-85eb-2b4869a79cf0",
       "timestamp": "2025-06-19T01:00:23.911304+00:00",
+      "member_count": 4
+    },
+    {
+      "id": "8a1326d9-b4f5-4579-8936-82fabe17e63c",
+      "timestamp": "2025-06-20T01:00:12.056618+00:00",
       "member_count": 4
     }
   ]
