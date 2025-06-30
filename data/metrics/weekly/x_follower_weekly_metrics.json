@@ -1,13 +1,13 @@
 {
   "dataset_name": "x_follower_weekly_metrics",
-  "created_at": "2025-06-23T03:54:36.072773Z",
+  "created_at": "2025-06-30T03:53:51.807355Z",
   "previous": {
-    "followers": 50708
-  },
-  "current": {
     "followers": 50644
   },
+  "current": {
+    "followers": 50564
+  },
   "change": {
-    "followers": -0.13
+    "followers": -0.16
   }
 }
