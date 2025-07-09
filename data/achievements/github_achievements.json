@@ -23,9 +23,16 @@
       "messages": [
         "\ud83c\udf89 New rig-core version detected: rig-core-v0.13.0!"
       ]
+    },
+    {
+      "id": "59ee8a09-65d2-4de6-a086-79fd4686ec6c",
+      "timestamp": "2025-07-09T01:02:06.019752+00:00",
+      "messages": [
+        "\ud83c\udf89 New rig-core version detected: rig-core-v0.14.0!"
+      ]
     }
   ],
   "last_star_milestone": 3000,
   "last_fork_milestone": 400,
-  "last_release_version": "rig-core-v0.13.0"
+  "last_release_version": "rig-core-v0.14.0"
 }
