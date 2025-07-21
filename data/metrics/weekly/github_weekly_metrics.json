@@ -1,16 +1,16 @@
 {
   "dataset_name": "github_weekly_metrics",
-  "created_at": "2025-07-14T04:01:53.702673Z",
+  "created_at": "2025-07-21T04:04:06.799869Z",
   "previous": {
-    "stars": 3902,
-    "forks": 414
-  },
-  "current": {
     "stars": 3946,
     "forks": 422
   },
+  "current": {
+    "stars": 3991,
+    "forks": 424
+  },
   "change": {
-    "stars": 1.13,
-    "forks": 1.93
+    "stars": 1.14,
+    "forks": 0.47
   }
 }
