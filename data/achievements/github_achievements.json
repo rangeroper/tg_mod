@@ -44,9 +44,16 @@
       "messages": [
         "\ud83c\udf89 New rig-core version detected: rig-core-v0.15.1!"
       ]
+    },
+    {
+      "id": "938cc7b4-6424-4b16-b725-69fd54a16681",
+      "timestamp": "2025-07-26T01:02:22.137305+00:00",
+      "messages": [
+        "\ud83c\udf89 Github Star milestone reached: 4000 stars!"
+      ]
     }
   ],
-  "last_star_milestone": 3000,
+  "last_star_milestone": 4000,
   "last_fork_milestone": 400,
   "last_release_version": "rig-core-v0.15.1"
 }
