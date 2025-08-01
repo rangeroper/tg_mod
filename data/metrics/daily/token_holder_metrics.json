@@ -1,6 +1,6 @@
 {
   "dataset_name": "token_holder_metrics",
-  "created_at": "2025-07-31T01:05:30.690025+00:00",
+  "created_at": "2025-08-01T01:13:03.972622+00:00",
   "entries": [
     {
       "id": "6719d5cd-2af4-4ba0-b0d8-5c9209fb4e7c",
@@ -531,6 +531,11 @@
       "id": "f0678b62-44c3-4618-a764-0e0e31576ed6",
       "timestamp": "2025-07-31T01:05:30.690011+00:00",
       "holder_count": 49105
+    },
+    {
+      "id": "58a352a1-fb89-4039-b9fd-d224e151d3a9",
+      "timestamp": "2025-08-01T01:13:03.972612+00:00",
+      "holder_count": 49055
     }
   ]
 }
