@@ -792,6 +792,13 @@
       "stars": 4069,
       "forks": 434,
       "release_version": "rig-core-v0.16.0"
+    },
+    {
+      "id": "20a9c000-13d9-4438-9f2c-2a09644ddcd4",
+      "timestamp": "2025-08-04T01:10:33.022842+00:00",
+      "stars": 4077,
+      "forks": 435,
+      "release_version": "rig-core-v0.16.0"
     }
   ]
 }
